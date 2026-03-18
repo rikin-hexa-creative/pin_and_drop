@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable;
 
@@ -77,6 +80,20 @@ class Admin extends Authenticatable
     public function isModerator(): bool
     {
         return $this->role === 'moderator';
+    }
+
+    // -------------------------------------------------------------------------
+    // Filament
+    // -------------------------------------------------------------------------
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'admin' && $this->is_active;
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->full_name;
     }
 
     // -------------------------------------------------------------------------

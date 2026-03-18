@@ -18,6 +18,7 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'size_chart',
         'base_price',
         'discount_price',
         'sku',
@@ -34,6 +35,7 @@ class Product extends Model
             'discount_price' => 'decimal:2',
             'is_featured'    => 'boolean',
             'approved_at'    => 'datetime',
+            'size_chart'     => 'array',
         ];
     }
 

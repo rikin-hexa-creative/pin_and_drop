@@ -17,14 +17,23 @@ class ProductVariant extends Model
         'color',
         'stock_qty',
         'extra_price',
+        'actual_price',
+        'selling_price',
+        'offer_price',
         'sku',
+        'image_url',
+        'images',
     ];
 
     protected function casts(): array
     {
         return [
             'extra_price' => 'decimal:2',
+            'actual_price' => 'decimal:2',
+            'selling_price' => 'decimal:2',
+            'offer_price' => 'decimal:2',
             'stock_qty'   => 'integer',
+            'images' => 'array',
         ];
     }
 
@@ -62,7 +71,12 @@ class ProductVariant extends Model
 
     public function getFinalPriceAttribute(): float
     {
-        return $this->product->effective_price + $this->extra_price;
+        $price = $this->offer_price
+            ?? $this->selling_price
+            ?? $this->actual_price
+            ?? $this->product->effective_price;
+
+        return (float) $price;
     }
 
     public function isInStock(): bool

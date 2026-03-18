@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Vendor extends Authenticatable
+class Vendor extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable, SoftDeletes;
 
@@ -104,5 +107,19 @@ class Vendor extends Authenticatable
     public function isSuspended(): bool
     {
         return $this->status === 'suspended';
+    }
+
+    // -------------------------------------------------------------------------
+    // Filament
+    // -------------------------------------------------------------------------
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'vendor' && $this->isApproved();
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->business_name;
     }
 }
