@@ -2,14 +2,18 @@
 
 namespace App\Filament\Vendor\Resources\Products\RelationManagers;
 
+use App\Models\Size;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -22,10 +26,15 @@ class VariantsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('color')
-                ->maxLength(50),
-            TextInput::make('size')
-                ->maxLength(20),
+            ColorPicker::make('color')
+                ->label('Color')
+                ->hex(),
+            Select::make('size')
+                ->label('Size')
+                ->options(fn () => Size::query()->active()->ordered()->pluck('name', 'name')->all())
+                ->searchable()
+                ->preload()
+                ->nullable(),
             TextInput::make('stock_qty')
                 ->label('Quantity')
                 ->integer()
@@ -48,7 +57,10 @@ class VariantsRelationManager extends RelationManager
                 ->image()
                 ->multiple()
                 ->disk('public')
-                ->directory('product-variants'),
+                ->directory('product-variants')
+                ->openable()
+                ->downloadable()
+                ->imagePreviewHeight('120'),
         ])->columns(2);
     }
 
@@ -56,8 +68,9 @@ class VariantsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('color')
-                    ->sortable()
+                ColorColumn::make('color')
+                    ->label('Color')
+                    ->copyable()
                     ->toggleable(),
                 TextColumn::make('size')
                     ->sortable()
@@ -76,7 +89,41 @@ class VariantsRelationManager extends RelationManager
                     ->toggleable(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->label('Add Variant')
+                    ->fillForm(function (CreateAction $action): array {
+                        $livewire = $action->getLivewire();
+
+                        if (! method_exists($livewire, 'getOwnerRecord')) {
+                            return [];
+                        }
+
+                        $owner = $livewire->getOwnerRecord();
+                        $last = $owner?->variants()->latest()->first();
+
+                        if (! $last) {
+                            return [];
+                        }
+
+                        return [
+                            'color' => $last->color,
+                            'size' => $last->size,
+                            'stock_qty' => $last->stock_qty,
+                            'actual_price' => $last->actual_price,
+                            'selling_price' => $last->selling_price,
+                            'offer_price' => $last->offer_price,
+                            'images' => $last->images ?? [],
+                        ];
+                    })
+                    ->preserveFormDataWhenCreatingAnother([
+                        'color',
+                        'size',
+                        'stock_qty',
+                        'actual_price',
+                        'selling_price',
+                        'offer_price',
+                        'images',
+                    ]),
             ])
             ->actions([
                 EditAction::make(),

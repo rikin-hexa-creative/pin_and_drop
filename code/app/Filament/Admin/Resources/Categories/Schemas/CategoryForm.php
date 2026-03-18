@@ -20,8 +20,7 @@ class CategoryForm
             Section::make('Category Details')
                 ->schema([
                     Hidden::make('created_by')
-                        ->default(fn () => auth()->guard('admin')->id())
-                        ->required(),
+                        ->dehydrated(false),
                     TextInput::make('name')
                         ->required()
                         ->maxLength(100)
@@ -45,10 +44,10 @@ class CategoryForm
                         ->default(0),
                     Toggle::make('is_active')
                         ->label('Active')
-                        ->default(true),
+                        ->default(fn ($record) => $record?->is_active ?? true),
                     Toggle::make('is_approved')
                         ->label('Approved')
-                        ->default(true),
+                        ->default(fn ($record) => $record?->is_approved ?? true),
                 ])
                 ->columns(2),
         ]);

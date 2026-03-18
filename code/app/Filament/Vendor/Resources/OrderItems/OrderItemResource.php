@@ -19,7 +19,7 @@ class OrderItemResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Management';
+    protected static string | \UnitEnum | null $navigationGroup = 'Order';
 
     protected static ?string $navigationLabel = 'Orders';
 

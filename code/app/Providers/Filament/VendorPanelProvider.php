@@ -32,6 +32,7 @@ class VendorPanelProvider extends PanelProvider
             ->authPasswordBroker('vendors')
             ->brandName('Vendor Dashboard')
             ->spa()
+            ->viteTheme('resources/css/filament/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ])

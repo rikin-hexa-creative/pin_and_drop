@@ -35,7 +35,6 @@ class Product extends Model
             'discount_price' => 'decimal:2',
             'is_featured'    => 'boolean',
             'approved_at'    => 'datetime',
-            'size_chart'     => 'array',
         ];
     }
 

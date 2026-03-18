@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->authPasswordBroker('admins')
             ->brandName('Admin Dashboard')
             ->spa()
+            ->viteTheme('resources/css/filament/theme.css')
             ->colors([
                 'primary' => Color::Blue,
             ])

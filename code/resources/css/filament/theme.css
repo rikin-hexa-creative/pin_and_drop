@@ -1,0 +1,17 @@
+@import '../../../vendor/filament/filament/resources/css/theme.css';
+
+.size-chart-editor .fi-fo-rich-editor-content table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.size-chart-editor .fi-fo-rich-editor-content table th,
+.size-chart-editor .fi-fo-rich-editor-content table td {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 6px 10px;
+  vertical-align: middle;
+}
+
+.size-chart-editor .fi-fo-rich-editor-content table tr {
+  height: 36px;
+}
