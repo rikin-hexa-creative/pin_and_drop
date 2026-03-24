@@ -1,4 +1,4 @@
-import ProductCard from "../components/product/ProductCard";
+import ProductCard from "../../../components/product/ProductCard";
 
 const navItems = ["Shop", "Designers", "Editorial", "Archive"];
 
@@ -16,64 +16,56 @@ const products = [
         size: "48 (M)",
         price: "$1,450",
         badge: "New",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuCfHsVRJhepzWSQOL0mrubE9H8a4Ma5Yz-_h5OKuXvEwFXam8lE02Iaz-icMKy_ODZDEspvVyLhiT4giqHEZQ8evrnU2MTkunycQcWEzqJlSShRf4wGWdZ3TGzeod_kasbzmCpM1RnQaAn53ieSinsKIyfOz_8sB-JMzIQZ0A535ec456o3CyW1q62Xs4LpXGr9m5RBAdKmJlH4lwvrdR07TwELm2ltwKXdUXFr9reCtD119Uc0D_pSTPRrqF90zC4ey134M97xlwiq",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfHsVRJhepzWSQOL0mrubE9H8a4Ma5Yz-_h5OKuXvEwFXam8lE02Iaz-icMKy_ODZDEspvVyLhiT4giqHEZQ8evrnU2MTkunycQcWEzqJlSShRf4wGWdZ3TGzeod_kasbzmCpM1RnQaAn53ieSinsKIyfOz_8sB-JMzIQZ0A535ec456o3CyW1q62Xs4LpXGr9m5RBAdKmJlH4lwvrdR07TwELm2ltwKXdUXFr9reCtD119Uc0D_pSTPRrqF90zC4ey134M97xlwiq",
     },
     {
         brand: "Maison Margiela",
         title: "GAT Replica Sneakers 'White/Grey'",
         size: "42",
         price: "$425",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuBR2rKM6XPDtfr5xw9Vqc5AFmUVi7SqdF0qSWr7hwAU7id66PehWsLx6MCRmPpzmYNH5yn8O8LMOnVIty5IKWDxbmm5crCX8WYJSEYo153mDtlc0k3dUV8jl7ynblWj2EEztUrhI-sC5O5Y7qBHvhm4glokCuJ3hGgkQSBRmOyo6rzp0SY5mU0sFIkWy6kW-UuAobuk7ymfZY0-7F3S6XaTL6-lJdYuqAYq-4bqe82iQ1C72873ltMtL6FfCOhSTer6Zl6p6yIiZoEp",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBR2rKM6XPDtfr5xw9Vqc5AFmUVi7SqdF0qSWr7hwAU7id66PehWsLx6MCRmPpzmYNH5yn8O8LMOnVIty5IKWDxbmm5crCX8WYJSEYo153mDtlc0k3dUV8jl7ynblWj2EEztUrhI-sC5O5Y7qBHvhm4glokCuJ3hGgkQSBRmOyo6rzp0SY5mU0sFIkWy6kW-UuAobuk7ymfZY0-7F3S6XaTL6-lJdYuqAYq-4bqe82iQ1C72873ltMtL6FfCOhSTer6Zl6p6yIiZoEp",
     },
     {
         brand: "Jil Sander",
         title: "Heavyweight Boxy Tee",
         size: "L",
         price: "$280",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuC51X9xFEuNufzBbwPhFRijyXFmWmuSpkvrnZpDxHJDc2lVCP9qlUaLXaUnV3CoaM2MBaz2WS8PBhGt-77YN8Fp1iEOLZAPCrvq2__bjwWHMGvJJUBAEiYZhsq-CmWIwu6uCTJ7h8Lvsy-R4bJ1oT0RLdlZNfy9avCCx1u0s5mmqgiyQW48Cj1r937ggUe3fMpxNYgvxvSidId6m8gkyNjlxc3c2ttE383UNX91Mr4BxW2Zl3IVItvP-ixAnZ8oGP4C5cS_WTjdahQI",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC51X9xFEuNufzBbwPhFRijyXFmWmuSpkvrnZpDxHJDc2lVCP9qlUaLXaUnV3CoaM2MBaz2WS8PBhGt-77YN8Fp1iEOLZAPCrvq2__bjwWHMGvJJUBAEiYZhsq-CmWIwu6uCTJ7h8Lvsy-R4bJ1oT0RLdlZNfy9avCCx1u0s5mmqgiyQW48Cj1r937ggUe3fMpxNYgvxvSidId6m8gkyNjlxc3c2ttE383UNX91Mr4BxW2Zl3IVItvP-ixAnZ8oGP4C5cS_WTjdahQI",
     },
     {
         brand: "Yohji Yamamoto",
         title: "Pour Homme Gabardine Trousers",
         size: "32",
         price: "$690",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuAKd4JuOQrg8vHH2bb-iQcPnhkk6mqzFk60zuChkqIY5nF3jH3pMGWGbJPUON-zTSzThCPcrLriHPquiBy8vHMK9COqe_5u3pfb04AVjoQ1MvWF7TDUIp_7unRH8umyYsXVolNXgFiHJv6LrDXSjigHGbu1k62Nnkza4V2oFlEz0FhgzstRRXSBmvPCL-s8sN_CuG8LGc24cripKWl27Yf9Xbi0NGhQ-SGk_ao7RavFRjmKWm1mUrmILv3UAMUnYW1ilBq7hM6QjrW3",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKd4JuOQrg8vHH2bb-iQcPnhkk6mqzFk60zuChkqIY5nF3jH3pMGWGbJPUON-zTSzThCPcrLriHPquiBy8vHMK9COqe_5u3pfb04AVjoQ1MvWF7TDUIp_7unRH8umyYsXVolNXgFiHJv6LrDXSjigHGbu1k62Nnkza4V2oFlEz0FhgzstRRXSBmvPCL-s8sN_CuG8LGc24cripKWl27Yf9Xbi0NGhQ-SGk_ao7RavFRjmKWm1mUrmILv3UAMUnYW1ilBq7hM6QjrW3",
     },
     {
         brand: "Helmut Lang",
         title: "1998 Raw Denim Trucker",
         size: "46 (S)",
         price: "$850",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuBsi_SJR4ESoaJ3fIteH8V5SyLuRe6pFK21l-vlEB7XIPvOH4uOIllRawWiELr-V-7JDNxpd9Hb_KZjO-3ui6zG-BLm0GAFtLDWT-PRKbM-Z3ZlNAg6hRHHr0-T-oYmCVHIZ9iGMr184d98i9ykCVX8bf0Du6mlpDKw7Obv_EhbZ10e27PiRrWX5dbJusGF6hwQhOEjOKJtYuIR1QpRQ2VLHjDp1rtlYiO6NCbwHkwnLZ9FTtAyGqWKfoIXQnwu1NbqzQeKbqEylPwc",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBsi_SJR4ESoaJ3fIteH8V5SyLuRe6pFK21l-vlEB7XIPvOH4uOIllRawWiELr-V-7JDNxpd9Hb_KZjO-3ui6zG-BLm0GAFtLDWT-PRKbM-Z3ZlNAg6hRHHr0-T-oYmCVHIZ9iGMr184d98i9ykCVX8bf0Du6mlpDKw7Obv_EhbZ10e27PiRrWX5dbJusGF6hwQhOEjOKJtYuIR1QpRQ2VLHjDp1rtlYiO6NCbwHkwnLZ9FTtAyGqWKfoIXQnwu1NbqzQeKbqEylPwc",
     },
     {
         brand: "Prada",
         title: "Technical Knit Half-Zip",
         size: "M",
         price: "$520",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuD3AgIgnnajIKVQE-4W-NVij2CeXqfhqT7xCZvtSbP5KN7oGSuq-RxjiT6zGfLcHDFCp9SinzlAlicly4Dyo7Cj2yv20xSh7LgAhrAybz0HLXjH3nqeId59Iu1UFIXdOfGfhfr6GXa4mQthIfatWcl_6ioA1dGKr44_fX02c47XGQ8-GNjUanx8PGlQtvNngphoWwHDfDmG0I05TR8q2Qhj837mpwIBEdTYrmquCo-Rs5_wu1-GwNAqRGrinhZjWbXw1Jr-4ta5iQVu",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3AgIgnnajIKVQE-4W-NVij2CeXqfhqT7xCZvtSbP5KN7oGSuq-RxjiT6zGfLcHDFCp9SinzlAlicly4Dyo7Cj2yv20xSh7LgAhrAybz0HLXjH3nqeId59Iu1UFIXdOfGfhfr6GXa4mQthIfatWcl_6ioA1dGKr44_fX02c47XGQ8-GNjUanx8PGlQtvNngphoWwHDfDmG0I05TR8q2Qhj837mpwIBEdTYrmquCo-Rs5_wu1-GwNAqRGrinhZjWbXw1Jr-4ta5iQVu",
     },
     {
         brand: "Saint Laurent",
         title: "Classic Chesterfield Wool Coat",
         size: "50 (L)",
         price: "$2,100",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuB0jkQ9Z_8d2YZwCC89Ebed-mc-3lhzUCUbrbugiIPi-90JPdVvWX-JUbcoluf6Tspe6rp1Pcl9lkO-mbGsWIpL4N_YsWJzUL9juFi5zqd9H7i9pFXy9k9RqCAdcqlU6i7XFC1IyPCLZJ-LIZJ6qcvsNRRgicvS4gXbUH0WTvRZ1PpbdeRPz4V25NuyImgQfUs000DO62pgJIWYwUpj10zYy8p12BRx6zj4k2Qx9sP0zbOg9jZmoPFC9USY7bHD8TJd9G1hTdcB0f4A",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB0jkQ9Z_8d2YZwCC89Ebed-mc-3lhzUCUbrbugiIPi-90JPdVvWX-JUbcoluf6Tspe6rp1Pcl9lkO-mbGsWIpL4N_YsWJzUL9juFi5zqd9H7i9pFXy9k9RqCAdcqlU6i7XFC1IyPCLZJ-LIZJ6qcvsNRRgicvS4gXbUH0WTvRZ1PpbdeRPz4V25NuyImgQfUs000DO62pgJIWYwUpj10zYy8p12BRx6zj4k2Qx9sP0zbOg9jZmoPFC9USY7bHD8TJd9G1hTdcB0f4A",
     },
     {
         brand: "Balenciaga",
         title: "WFP Oversized Hoodie Black",
         size: "S (Fits L)",
         price: "$640",
-        image:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDPDy31d2okfGby24I0SwxtLJ_EF_-vR39jy8CTfPYw99nfAmRAKKW1rs9MJpJkwlQd-McHg79A2iqO3DfZ4Punzikij2PE7QCoWdXN0ZMuHTt9uvTInIb3Td2Td7w3I9hVSV4bpBPbp40lgqW1Zxb6i2ngF6M1f1kfPDgfBZ-u4npfcFX46bZjNGCPEUookb2lqUtX5s5H9UBv8fXBRIzijafkSl4YLtijACvADkDzaS_G3WgKle20XFpjEF0EXVBk37SJR9ON_31Y",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDPDy31d2okfGby24I0SwxtLJ_EF_-vR39jy8CTfPYw99nfAmRAKKW1rs9MJpJkwlQd-McHg79A2iqO3DfZ4Punzikij2PE7QCoWdXN0ZMuHTt9uvTInIb3Td2Td7w3I9hVSV4bpBPbp40lgqW1Zxb6i2ngF6M1f1kfPDgfBZ-u4npfcFX46bZjNGCPEUookb2lqUtX5s5H9UBv8fXBRIzijafkSl4YLtijACvADkDzaS_G3WgKle20XFpjEF0EXVBk37SJR9ON_31Y",
     },
 ];
 
@@ -100,11 +92,21 @@ const ShopPage = () => {
                     ))}
                 </div>
                 <div className="flex items-center gap-6">
-                    <button className="transition-transform active:scale-95" type="button">
-                        <span className="material-symbols-outlined text-black">shopping_bag</span>
+                    <button
+                        className="transition-transform active:scale-95"
+                        type="button"
+                    >
+                        <span className="material-symbols-outlined text-black">
+                            shopping_bag
+                        </span>
                     </button>
-                    <button className="transition-transform active:scale-95" type="button">
-                        <span className="material-symbols-outlined text-black">person</span>
+                    <button
+                        className="transition-transform active:scale-95"
+                        type="button"
+                    >
+                        <span className="material-symbols-outlined text-black">
+                            person
+                        </span>
                     </button>
                 </div>
             </nav>
@@ -122,7 +124,10 @@ const ShopPage = () => {
                         </div>
                         <div className="space-y-8">
                             {filters.map((filter) => (
-                                <div key={filter.label} className="group cursor-pointer">
+                                <div
+                                    key={filter.label}
+                                    className="group cursor-pointer"
+                                >
                                     <div
                                         className={`flex items-center gap-3 font-bold transition-all ${
                                             filter.active
@@ -130,7 +135,9 @@ const ShopPage = () => {
                                                 : "text-black/40 group-hover:text-black"
                                         }`}
                                     >
-                                        <span className="material-symbols-outlined">{filter.icon}</span>
+                                        <span className="material-symbols-outlined">
+                                            {filter.icon}
+                                        </span>
                                         <span className="text-xs uppercase tracking-widest font-['Space Grotesk']">
                                             {filter.label}
                                         </span>
@@ -182,7 +189,11 @@ const ShopPage = () => {
 
                         <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {products.map((product) => (
-                                <ProductCard key={product.title} variant="shop" {...product} />
+                                <ProductCard
+                                    key={product.title}
+                                    variant="shop"
+                                    {...product}
+                                />
                             ))}
                         </div>
 
@@ -206,15 +217,17 @@ const ShopPage = () => {
                     THE DIGITAL CURATOR
                 </div>
                 <div className="flex flex-wrap gap-6 md:gap-8">
-                    {["Privacy", "Terms", "Accessibility", "Contact"].map((item) => (
-                        <a
-                            key={item}
-                            href="#"
-                            className="text-[10px] uppercase tracking-widest text-black/60 transition-colors hover:text-black font-['Space Grotesk']"
-                        >
-                            {item}
-                        </a>
-                    ))}
+                    {["Privacy", "Terms", "Accessibility", "Contact"].map(
+                        (item) => (
+                            <a
+                                key={item}
+                                href="#"
+                                className="text-[10px] uppercase tracking-widest text-black/60 transition-colors hover:text-black font-['Space Grotesk']"
+                            >
+                                {item}
+                            </a>
+                        )
+                    )}
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-black/40 font-['Space Grotesk']">
                     © 2024 THE DIGITAL CURATOR. ALL RIGHTS RESERVED.

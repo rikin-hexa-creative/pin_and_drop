@@ -1,19 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "../Layouts/Layout";
-import HomePage from "../pages/HomePage";
-import ShopPage from "../pages/ShopPage";
-
-function Home() {
-    return <h1>Home Page</h1>;
-}
-
-function About() {
-    return <h1>About Page</h1>;
-}
-
-function Dashboard() {
-    return <h1>Dashboard</h1>;
-}
+import SignInPage from "../panel/auth/SignInPage";
+import SignUpPage from "../panel/auth/SignUpPage";
+import Layout from "../panel/guest/layout/Layout";
+import HomePage from "../panel/guest/pages/HomePage";
+import ShopPage from "../panel/guest/pages/ShopPage";
 
 const MyRouter = () => {
     const router = createBrowserRouter([
@@ -28,6 +18,14 @@ const MyRouter = () => {
                 {
                     path: "/shop",
                     element: <ShopPage />,
+                },
+                {
+                    path: "/sign-in",
+                    element: <SignInPage />,
+                },
+                {
+                    path: "/sign-up",
+                    element: <SignUpPage />,
                 },
             ],
         },

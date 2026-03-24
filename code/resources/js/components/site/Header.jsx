@@ -1,5 +1,7 @@
+import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../../context/UserContext";
 
 const APP_ROUTES = new Set(["/", "/shop"]);
 
@@ -24,7 +26,10 @@ const vendorsMenu = {
             { label: "Chrome Hearts", to: "/vendors/chrome-hearts" },
             { label: "Comme des Garcons", to: "/vendors/comme-des-garcons" },
             { label: "Dior", to: "/vendors/dior" },
-            { label: "Enfants Riches Deprimes", to: "/vendors/enfants-riches-deprimes" },
+            {
+                label: "Enfants Riches Deprimes",
+                to: "/vendors/enfants-riches-deprimes",
+            },
             { label: "Gucci", to: "/vendors/gucci" },
             { label: "Kapital", to: "/vendors/kapital" },
             { label: "Louis Vuitton", to: "/vendors/louis-vuitton" },
@@ -37,7 +42,10 @@ const vendorsMenu = {
             { label: "Prada", to: "/vendors/prada" },
             { label: "Raf Simons", to: "/vendors/raf-simons" },
             { label: "Rick Owens", to: "/vendors/rick-owens" },
-            { label: "Saint Laurent Paris", to: "/vendors/saint-laurent-paris" },
+            {
+                label: "Saint Laurent Paris",
+                to: "/vendors/saint-laurent-paris",
+            },
         ],
         [
             { label: "Stone Island", to: "/vendors/stone-island" },
@@ -61,13 +69,31 @@ const menswearMenu = {
         {
             heading: { label: "Tops", to: "/categories/tops" },
             links: [
-                { label: "Long Sleeve T-Shirts", to: "/categories/long-sleeve-t-shirts" },
+                {
+                    label: "Long Sleeve T-Shirts",
+                    to: "/categories/long-sleeve-t-shirts",
+                },
                 { label: "Polos", to: "/categories/polos" },
-                { label: "Shirts (Button Ups)", to: "/categories/shirts-button-ups" },
-                { label: "Short Sleeve T-Shirts", to: "/categories/short-sleeve-t-shirts" },
-                { label: "Sweaters & Knitwear", to: "/categories/sweaters-knitwear" },
-                { label: "Sweatshirts & Hoodies", to: "/categories/sweatshirts-hoodies" },
-                { label: "Tank Tops & Sleeveless", to: "/categories/tank-tops-sleeveless" },
+                {
+                    label: "Shirts (Button Ups)",
+                    to: "/categories/shirts-button-ups",
+                },
+                {
+                    label: "Short Sleeve T-Shirts",
+                    to: "/categories/short-sleeve-t-shirts",
+                },
+                {
+                    label: "Sweaters & Knitwear",
+                    to: "/categories/sweaters-knitwear",
+                },
+                {
+                    label: "Sweatshirts & Hoodies",
+                    to: "/categories/sweatshirts-hoodies",
+                },
+                {
+                    label: "Tank Tops & Sleeveless",
+                    to: "/categories/tank-tops-sleeveless",
+                },
                 { label: "Jerseys", to: "/categories/jerseys" },
             ],
         },
@@ -78,9 +104,15 @@ const menswearMenu = {
                 { label: "Cropped Pants", to: "/categories/cropped-pants" },
                 { label: "Denim", to: "/categories/denim" },
                 { label: "Leggings", to: "/categories/leggings" },
-                { label: "Overalls & Jumpsuits", to: "/categories/overalls-jumpsuits" },
+                {
+                    label: "Overalls & Jumpsuits",
+                    to: "/categories/overalls-jumpsuits",
+                },
                 { label: "Shorts", to: "/categories/shorts" },
-                { label: "Sweatpants & Joggers", to: "/categories/sweatpants-joggers" },
+                {
+                    label: "Sweatpants & Joggers",
+                    to: "/categories/sweatpants-joggers",
+                },
                 { label: "Swimwear", to: "/categories/swimwear" },
             ],
         },
@@ -102,10 +134,16 @@ const menswearMenu = {
             heading: { label: "Footwear", to: "/categories/footwear" },
             links: [
                 { label: "Boots", to: "/categories/boots" },
-                { label: "Casual Leather Shoes", to: "/categories/casual-leather-shoes" },
+                {
+                    label: "Casual Leather Shoes",
+                    to: "/categories/casual-leather-shoes",
+                },
                 { label: "Formal Shoes", to: "/categories/formal-shoes" },
                 { label: "Hi-Top Sneakers", to: "/categories/hi-top-sneakers" },
-                { label: "Low-Top Sneakers", to: "/categories/low-top-sneakers" },
+                {
+                    label: "Low-Top Sneakers",
+                    to: "/categories/low-top-sneakers",
+                },
                 { label: "Sandals", to: "/categories/sandals" },
                 { label: "Slip Ons", to: "/categories/slip-ons" },
             ],
@@ -118,12 +156,24 @@ const menswearMenu = {
                 { label: "Glasses", to: "/categories/glasses" },
                 { label: "Gloves & Scarves", to: "/categories/gloves-scarves" },
                 { label: "Hats", to: "/categories/hats" },
-                { label: "Jewelry & Watches", to: "/categories/jewelry-watches" },
+                {
+                    label: "Jewelry & Watches",
+                    to: "/categories/jewelry-watches",
+                },
                 { label: "Wallets", to: "/categories/wallets" },
-                { label: "Miscellaneous", to: "/categories/accessories-miscellaneous" },
-                { label: "Socks & Underwear", to: "/categories/socks-underwear" },
+                {
+                    label: "Miscellaneous",
+                    to: "/categories/accessories-miscellaneous",
+                },
+                {
+                    label: "Socks & Underwear",
+                    to: "/categories/socks-underwear",
+                },
                 { label: "Sunglasses", to: "/categories/sunglasses" },
-                { label: "Ties & Pocketsquares", to: "/categories/ties-pocketsquares" },
+                {
+                    label: "Ties & Pocketsquares",
+                    to: "/categories/ties-pocketsquares",
+                },
             ],
         },
         {
@@ -151,14 +201,26 @@ const womenswearMenu = {
             links: [
                 { label: "Blouses", to: "/categories/womenswear/blouses" },
                 { label: "Bodysuits", to: "/categories/womenswear/bodysuits" },
-                { label: "Button Ups", to: "/categories/womenswear/button-ups" },
+                {
+                    label: "Button Ups",
+                    to: "/categories/womenswear/button-ups",
+                },
                 { label: "Crop Tops", to: "/categories/womenswear/crop-tops" },
                 { label: "Hoodies", to: "/categories/womenswear/hoodies" },
-                { label: "Long Sleeve T-Shirts", to: "/categories/womenswear/long-sleeve-t-shirts" },
+                {
+                    label: "Long Sleeve T-Shirts",
+                    to: "/categories/womenswear/long-sleeve-t-shirts",
+                },
                 { label: "Polos", to: "/categories/womenswear/polos" },
-                { label: "Short Sleeve T-Shirts", to: "/categories/womenswear/short-sleeve-t-shirts" },
+                {
+                    label: "Short Sleeve T-Shirts",
+                    to: "/categories/womenswear/short-sleeve-t-shirts",
+                },
                 { label: "Sweaters", to: "/categories/womenswear/sweaters" },
-                { label: "Sweatshirts", to: "/categories/womenswear/sweatshirts" },
+                {
+                    label: "Sweatshirts",
+                    to: "/categories/womenswear/sweatshirts",
+                },
                 { label: "Tank Tops", to: "/categories/womenswear/tank-tops" },
             ],
         },
@@ -168,42 +230,87 @@ const womenswearMenu = {
                 { label: "Jeans", to: "/categories/womenswear/jeans" },
                 { label: "Jumpsuits", to: "/categories/womenswear/jumpsuits" },
                 { label: "Leggings", to: "/categories/womenswear/leggings" },
-                { label: "Maxi Skirts", to: "/categories/womenswear/maxi-skirts" },
-                { label: "Midi Skirts", to: "/categories/womenswear/midi-skirts" },
-                { label: "Mini Skirts", to: "/categories/womenswear/mini-skirts" },
+                {
+                    label: "Maxi Skirts",
+                    to: "/categories/womenswear/maxi-skirts",
+                },
+                {
+                    label: "Midi Skirts",
+                    to: "/categories/womenswear/midi-skirts",
+                },
+                {
+                    label: "Mini Skirts",
+                    to: "/categories/womenswear/mini-skirts",
+                },
                 { label: "Pants", to: "/categories/womenswear/pants" },
                 { label: "Shorts", to: "/categories/womenswear/shorts" },
-                { label: "Mini Dresses", to: "/categories/womenswear/mini-dresses" },
-                { label: "Midi Dresses", to: "/categories/womenswear/midi-dresses" },
-                { label: "Maxi Dresses", to: "/categories/womenswear/maxi-dresses" },
+                {
+                    label: "Mini Dresses",
+                    to: "/categories/womenswear/mini-dresses",
+                },
+                {
+                    label: "Midi Dresses",
+                    to: "/categories/womenswear/midi-dresses",
+                },
+                {
+                    label: "Maxi Dresses",
+                    to: "/categories/womenswear/maxi-dresses",
+                },
                 { label: "Gowns", to: "/categories/womenswear/gowns-dresses" },
             ],
         },
         {
-            heading: { label: "Outerwear", to: "/categories/womenswear/outerwear" },
+            heading: {
+                label: "Outerwear",
+                to: "/categories/womenswear/outerwear",
+            },
             links: [
                 { label: "Blazers", to: "/categories/womenswear/blazers" },
                 { label: "Bombers", to: "/categories/womenswear/bombers" },
                 { label: "Coats", to: "/categories/womenswear/coats" },
-                { label: "Denim Jackets", to: "/categories/womenswear/denim-jackets" },
-                { label: "Down Jackets", to: "/categories/womenswear/down-jackets" },
-                { label: "Fur & Faux Fur", to: "/categories/womenswear/fur-faux-fur" },
+                {
+                    label: "Denim Jackets",
+                    to: "/categories/womenswear/denim-jackets",
+                },
+                {
+                    label: "Down Jackets",
+                    to: "/categories/womenswear/down-jackets",
+                },
+                {
+                    label: "Fur & Faux Fur",
+                    to: "/categories/womenswear/fur-faux-fur",
+                },
                 { label: "Jackets", to: "/categories/womenswear/jackets" },
-                { label: "Leather Jackets", to: "/categories/womenswear/leather-jackets" },
-                { label: "Rain Jackets", to: "/categories/womenswear/rain-jackets" },
+                {
+                    label: "Leather Jackets",
+                    to: "/categories/womenswear/leather-jackets",
+                },
+                {
+                    label: "Rain Jackets",
+                    to: "/categories/womenswear/rain-jackets",
+                },
                 { label: "Vests", to: "/categories/womenswear/vests" },
             ],
         },
         {
-            heading: { label: "Footwear", to: "/categories/womenswear/footwear" },
+            heading: {
+                label: "Footwear",
+                to: "/categories/womenswear/footwear",
+            },
             links: [
                 { label: "Boots", to: "/categories/womenswear/boots" },
                 { label: "Heels", to: "/categories/womenswear/heels" },
                 { label: "Platforms", to: "/categories/womenswear/platforms" },
                 { label: "Mules", to: "/categories/womenswear/mules" },
                 { label: "Flats", to: "/categories/womenswear/flats" },
-                { label: "Hi-Top Sneakers", to: "/categories/womenswear/hi-top-sneakers" },
-                { label: "Low-Top Sneakers", to: "/categories/womenswear/low-top-sneakers" },
+                {
+                    label: "Hi-Top Sneakers",
+                    to: "/categories/womenswear/hi-top-sneakers",
+                },
+                {
+                    label: "Low-Top Sneakers",
+                    to: "/categories/womenswear/low-top-sneakers",
+                },
                 { label: "Sandals", to: "/categories/womenswear/sandals" },
                 { label: "Slip Ons", to: "/categories/womenswear/slip-ons" },
                 { label: "Bracelets", to: "/categories/womenswear/bracelets" },
@@ -213,35 +320,71 @@ const womenswearMenu = {
             ],
         },
         {
-            heading: { label: "Accessories", to: "/categories/womenswear/accessories" },
+            heading: {
+                label: "Accessories",
+                to: "/categories/womenswear/accessories",
+            },
             links: [
                 { label: "Belts", to: "/categories/womenswear/belts" },
                 { label: "Glasses", to: "/categories/womenswear/glasses" },
                 { label: "Gloves", to: "/categories/womenswear/gloves" },
-                { label: "Hair Accessories", to: "/categories/womenswear/hair-accessories" },
+                {
+                    label: "Hair Accessories",
+                    to: "/categories/womenswear/hair-accessories",
+                },
                 { label: "Hats", to: "/categories/womenswear/hats" },
-                { label: "Miscellaneous", to: "/categories/womenswear/miscellaneous" },
+                {
+                    label: "Miscellaneous",
+                    to: "/categories/womenswear/miscellaneous",
+                },
                 { label: "Scarves", to: "/categories/womenswear/scarves" },
-                { label: "Socks & Intimates", to: "/categories/womenswear/socks-intimates" },
-                { label: "Sunglasses", to: "/categories/womenswear/sunglasses" },
+                {
+                    label: "Socks & Intimates",
+                    to: "/categories/womenswear/socks-intimates",
+                },
+                {
+                    label: "Sunglasses",
+                    to: "/categories/womenswear/sunglasses",
+                },
                 { label: "Wallets", to: "/categories/womenswear/wallets" },
                 { label: "Watches", to: "/categories/womenswear/watches" },
             ],
         },
         {
-            heading: { label: "Bags & Luggage", to: "/categories/womenswear/bags-luggage" },
+            heading: {
+                label: "Bags & Luggage",
+                to: "/categories/womenswear/bags-luggage",
+            },
             links: [
                 { label: "Backpacks", to: "/categories/womenswear/backpacks" },
                 { label: "Belt Bags", to: "/categories/womenswear/belt-bags" },
-                { label: "Bucket Bags", to: "/categories/womenswear/bucket-bags" },
+                {
+                    label: "Bucket Bags",
+                    to: "/categories/womenswear/bucket-bags",
+                },
                 { label: "Clutches", to: "/categories/womenswear/clutches" },
-                { label: "Crossbody Bags", to: "/categories/womenswear/crossbody-bags" },
-                { label: "Handle Bags", to: "/categories/womenswear/handle-bags" },
+                {
+                    label: "Crossbody Bags",
+                    to: "/categories/womenswear/crossbody-bags",
+                },
+                {
+                    label: "Handle Bags",
+                    to: "/categories/womenswear/handle-bags",
+                },
                 { label: "Hobo Bags", to: "/categories/womenswear/hobo-bags" },
-                { label: "Luggage & Travel", to: "/categories/womenswear/luggage-travel" },
-                { label: "Messengers & Satchels", to: "/categories/womenswear/messengers-satchels" },
+                {
+                    label: "Luggage & Travel",
+                    to: "/categories/womenswear/luggage-travel",
+                },
+                {
+                    label: "Messengers & Satchels",
+                    to: "/categories/womenswear/messengers-satchels",
+                },
                 { label: "Mini Bags", to: "/categories/womenswear/mini-bags" },
-                { label: "Shoulder Bags", to: "/categories/womenswear/shoulder-bags" },
+                {
+                    label: "Shoulder Bags",
+                    to: "/categories/womenswear/shoulder-bags",
+                },
                 { label: "Tote Bags", to: "/categories/womenswear/tote-bags" },
                 { label: "Other", to: "/categories/womenswear/other" },
             ],
@@ -285,26 +428,33 @@ const profileMenu = {
 };
 
 const AppLink = ({ to, children, ...props }) => {
-    if (APP_ROUTES.has(to)) {
-        return (
-            <Link to={to} {...props}>
-                {children}
-            </Link>
-        );
-    }
-
     return (
-        <a href={to} {...props}>
+        <Link to={to} {...props}>
             {children}
-        </a>
+        </Link>
     );
 };
 
 const MenuIcon = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 fill-none">
-        <path d="M3 5.75H21" className="stroke-current" strokeWidth="1.5" strokeLinecap="square" />
-        <path d="M3 12H21" className="stroke-current" strokeWidth="1.5" strokeLinecap="square" />
-        <path d="M3 18.25H21" className="stroke-current" strokeWidth="1.5" strokeLinecap="square" />
+        <path
+            d="M3 5.75H21"
+            className="stroke-current"
+            strokeWidth="1.5"
+            strokeLinecap="square"
+        />
+        <path
+            d="M3 12H21"
+            className="stroke-current"
+            strokeWidth="1.5"
+            strokeLinecap="square"
+        />
+        <path
+            d="M3 18.25H21"
+            className="stroke-current"
+            strokeWidth="1.5"
+            strokeLinecap="square"
+        />
     </svg>
 );
 
@@ -315,7 +465,12 @@ const SearchIcon = () => (
             className="stroke-current"
             strokeWidth="1.75"
         />
-        <path d="m16 16 5 5" className="stroke-current" strokeWidth="1.75" strokeLinecap="square" />
+        <path
+            d="m16 16 5 5"
+            className="stroke-current"
+            strokeWidth="1.75"
+            strokeLinecap="square"
+        />
     </svg>
 );
 
@@ -373,7 +528,9 @@ const renderDesktopMegaMenu = (menu) => {
     if (menu.id === "vendors") {
         return (
             <div className="space-y-6">
-                <div className="text-base font-bold tracking-[0.01em] text-black">{menu.title}</div>
+                <div className="text-base font-bold tracking-[0.01em] text-black">
+                    {menu.title}
+                </div>
                 <div className="grid gap-8 lg:grid-cols-4">
                     {menu.columns.map((column, index) => (
                         <div key={index} className="space-y-2">
@@ -401,7 +558,9 @@ const renderDesktopMegaMenu = (menu) => {
 
     return (
         <div className="space-y-6">
-            <div className="text-base font-bold tracking-[0.01em] text-black">{menu.title}</div>
+            <div className="text-base font-bold tracking-[0.01em] text-black">
+                {menu.title}
+            </div>
             <div className="grid gap-8 lg:grid-cols-6">
                 {menu.columns.map((column) => (
                     <div key={column.heading.label} className="space-y-3">
@@ -480,10 +639,18 @@ const renderMobileMegaMenu = (menu) => {
 };
 
 const Header = () => {
+    const { user, setUser } = useUser();
+
     const [activeMenu, setActiveMenu] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef(null);
+    const isAuthenticated = Boolean(user);
+    const userDisplayName =
+        user?.full_name || user?.email || profileMenu.username.label;
+    const userAvatar =
+         '/storage/'+ user?.avatar ||
+        "https://media-assets.grailed.com/prd/misc/PVEFHQYACL92VZTZETOTVQNFENXZW7S5U0MLUG";
 
     useEffect(() => {
         if (!profileMenuOpen) {
@@ -533,6 +700,12 @@ const Header = () => {
     };
 
     const closeProfileMenu = () => setProfileMenuOpen(false);
+    const handleSignOut = () => {
+        Cookies.remove("user_token");
+        setUser(null);
+        closeProfileMenu();
+        window.location.href = "/sign-in";
+    };
 
     return (
         <header
@@ -608,7 +781,9 @@ const Header = () => {
                                 key={action.label}
                                 to={action.to}
                                 className={`hidden h-10 items-center px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-black hover:text-white sm:inline-flex ${
-                                    action.bordered ? "border border-black/15" : ""
+                                    action.bordered
+                                        ? "border border-black/15"
+                                        : ""
                                 }`}
                             >
                                 {action.label}
@@ -631,127 +806,164 @@ const Header = () => {
                             <HeartIcon />
                         </AppLink>
 
-                        <div className="relative" ref={profileMenuRef}>
-                            <button
-                                type="button"
-                                id="desktop-profile-trigger"
-                                aria-label="Open profile menu"
-                                aria-haspopup="menu"
-                                aria-expanded={profileMenuOpen}
-                                aria-controls={profileMenuOpen ? "desktop-profile-menu" : undefined}
-                                data-state={profileMenuOpen ? "open" : "closed"}
-                                className={`inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border transition ${
-                                    profileMenuOpen
-                                        ? "border-black shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
-                                        : "border-black/10"
-                                }`}
-                                onClick={toggleProfileMenu}
-                            >
-                                <img
-                                    className="h-full w-full object-cover"
-                                    alt="User avatar"
-                                    src="https://media-assets.grailed.com/prd/misc/PVEFHQYACL92VZTZETOTVQNFENXZW7S5U0MLUG"
-                                />
-                            </button>
-
-                            {profileMenuOpen && (
-                                <div
-                                    id="desktop-profile-menu"
-                                    data-side="bottom"
-                                    data-align="center"
-                                    data-state="open"
-                                    role="menu"
-                                    aria-orientation="vertical"
-                                    aria-labelledby="desktop-profile-trigger"
-                                    className="absolute right-0 top-[calc(100%+12px)] z-50 w-[284px] rounded-[28px] border border-black/10 bg-white p-3 text-black shadow-[0_28px_90px_rgba(0,0,0,0.18)]"
+                        {isAuthenticated ? (
+                            <div className="relative" ref={profileMenuRef}>
+                                <button
+                                    type="button"
+                                    id="desktop-profile-trigger"
+                                    aria-label="Open profile menu"
+                                    aria-haspopup="menu"
+                                    aria-expanded={profileMenuOpen}
+                                    aria-controls={
+                                        profileMenuOpen
+                                            ? "desktop-profile-menu"
+                                            : undefined
+                                    }
+                                    data-state={
+                                        profileMenuOpen ? "open" : "closed"
+                                    }
+                                    className={`inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border transition ${
+                                        profileMenuOpen
+                                            ? "border-black shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+                                            : "border-black/10"
+                                    }`}
+                                    onClick={toggleProfileMenu}
                                 >
-                                    <AppLink
-                                        to={profileMenu.username.to}
-                                        role="menuitem"
-                                        className="flex items-center justify-between rounded-[20px] px-4 py-3 transition hover:bg-[#f6f3ef]"
-                                        onClick={closeProfileMenu}
-                                    >
-                                        <span className="text-base font-bold tracking-[0.01em] text-black">
-                                            {profileMenu.username.label}
-                                        </span>
-                                        <ForwardCaretIcon />
-                                    </AppLink>
-
-                                    <div className="mt-1 space-y-1">
-                                        {profileMenu.accountLinks.map((item) => (
-                                            <AppLink
-                                                key={item.label}
-                                                to={item.to}
-                                                role="menuitem"
-                                                className="block rounded-[18px] px-4 py-3 text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
-                                                onClick={closeProfileMenu}
-                                            >
-                                                {item.label}
-                                            </AppLink>
-                                        ))}
-                                    </div>
-
-                                    <div
-                                        role="separator"
-                                        aria-orientation="horizontal"
-                                        className="my-2 h-px bg-black/10"
+                                    <img
+                                        className="h-full w-full object-cover"
+                                        alt="User avatar"
+                                        src={userAvatar}
                                     />
+                                </button>
 
-                                    <AppLink
-                                        to={profileMenu.selling.heading.to}
-                                        role="menuitem"
-                                        className="flex items-center justify-between rounded-[18px] px-4 py-3 transition hover:bg-[#f6f3ef]"
-                                        onClick={closeProfileMenu}
-                                    >
-                                        <span className="text-[12px] font-bold tracking-[0.08em] text-black">
-                                            {profileMenu.selling.heading.label}
-                                        </span>
-                                        <ForwardCaretIcon />
-                                    </AppLink>
-
-                                    <div className="space-y-1">
-                                        {profileMenu.selling.links.map((item) => (
-                                            <AppLink
-                                                key={item.label}
-                                                to={item.to}
-                                                role="menuitem"
-                                                className="block rounded-[18px] px-4 py-3 text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
-                                                onClick={closeProfileMenu}
-                                            >
-                                                {item.label}
-                                            </AppLink>
-                                        ))}
-                                    </div>
-
+                                {profileMenuOpen && (
                                     <div
-                                        role="separator"
-                                        aria-orientation="horizontal"
-                                        className="my-2 h-px bg-black/10"
-                                    />
-
-                                    <AppLink
-                                        to={profileMenu.settings.heading.to}
-                                        role="menuitem"
-                                        className="flex items-center justify-between rounded-[18px] px-4 py-3 transition hover:bg-[#f6f3ef]"
-                                        onClick={closeProfileMenu}
+                                        id="desktop-profile-menu"
+                                        data-side="bottom"
+                                        data-align="center"
+                                        data-state="open"
+                                        role="menu"
+                                        aria-orientation="vertical"
+                                        aria-labelledby="desktop-profile-trigger"
+                                        className="absolute right-0 top-[calc(100%+12px)] z-50 w-[284px] rounded-[28px] border border-black/10 bg-white p-3 text-black shadow-[0_28px_90px_rgba(0,0,0,0.18)]"
                                     >
-                                        <span className="text-[12px] font-bold tracking-[0.08em] text-black">
-                                            {profileMenu.settings.heading.label}
-                                        </span>
-                                        <ForwardCaretIcon />
-                                    </AppLink>
+                                        <AppLink
+                                            to={profileMenu.username.to}
+                                            role="menuitem"
+                                            className="flex items-center justify-between rounded-[20px] px-4 py-3 transition hover:bg-[#f6f3ef]"
+                                            onClick={closeProfileMenu}
+                                        >
+                                            <span className="text-base font-bold tracking-[0.01em] text-black">
+                                                {userDisplayName}
+                                            </span>
+                                            <ForwardCaretIcon />
+                                        </AppLink>
 
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        className="mt-1 block w-full rounded-[18px] px-4 py-3 text-left text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
-                                        onClick={closeProfileMenu}
-                                    >
-                                        SIGN OUT
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                        <div className="mt-1 space-y-1">
+                                            {profileMenu.accountLinks.map(
+                                                (item) => (
+                                                    <AppLink
+                                                        key={item.label}
+                                                        to={item.to}
+                                                        role="menuitem"
+                                                        className="block rounded-[18px] px-4 py-3 text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
+                                                        onClick={
+                                                            closeProfileMenu
+                                                        }
+                                                    >
+                                                        {item.label}
+                                                    </AppLink>
+                                                )
+                                            )}
+                                        </div>
+
+                                        <div
+                                            role="separator"
+                                            aria-orientation="horizontal"
+                                            className="my-2 h-px bg-black/10"
+                                        />
+
+                                        <AppLink
+                                            to={profileMenu.selling.heading.to}
+                                            role="menuitem"
+                                            className="flex items-center justify-between rounded-[18px] px-4 py-3 transition hover:bg-[#f6f3ef]"
+                                            onClick={closeProfileMenu}
+                                        >
+                                            <span className="text-[12px] font-bold tracking-[0.08em] text-black">
+                                                {
+                                                    profileMenu.selling.heading
+                                                        .label
+                                                }
+                                            </span>
+                                            <ForwardCaretIcon />
+                                        </AppLink>
+
+                                        <div className="space-y-1">
+                                            {profileMenu.selling.links.map(
+                                                (item) => (
+                                                    <AppLink
+                                                        key={item.label}
+                                                        to={item.to}
+                                                        role="menuitem"
+                                                        className="block rounded-[18px] px-4 py-3 text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
+                                                        onClick={
+                                                            closeProfileMenu
+                                                        }
+                                                    >
+                                                        {item.label}
+                                                    </AppLink>
+                                                )
+                                            )}
+                                        </div>
+
+                                        <div
+                                            role="separator"
+                                            aria-orientation="horizontal"
+                                            className="my-2 h-px bg-black/10"
+                                        />
+
+                                        <AppLink
+                                            to={profileMenu.settings.heading.to}
+                                            role="menuitem"
+                                            className="flex items-center justify-between rounded-[18px] px-4 py-3 transition hover:bg-[#f6f3ef]"
+                                            onClick={closeProfileMenu}
+                                        >
+                                            <span className="text-[12px] font-bold tracking-[0.08em] text-black">
+                                                {
+                                                    profileMenu.settings.heading
+                                                        .label
+                                                }
+                                            </span>
+                                            <ForwardCaretIcon />
+                                        </AppLink>
+
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            className="mt-1 block w-full rounded-[18px] px-4 py-3 text-left text-[12px] leading-[14px] text-black/80 transition hover:bg-[#f6f3ef] hover:text-black"
+                                            onClick={handleSignOut}
+                                        >
+                                            SIGN OUT
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="hidden items-center gap-2 sm:flex">
+                                <AppLink
+                                    to="/sign-in"
+                                    className="h-10 border border-black/15 px-4 inline-flex items-center text-[11px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-black hover:text-white"
+                                >
+                                    SIGN IN
+                                </AppLink>
+                                <AppLink
+                                    to="/sign-up"
+                                    className="h-10 border border-black bg-black px-4 inline-flex items-center text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-black"
+                                >
+                                    SIGN UP
+                                </AppLink>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -769,7 +981,10 @@ const Header = () => {
                             ))}
 
                             {megaMenus.map((menu) => (
-                                <details key={menu.id} className="border-t border-black/10 pt-4">
+                                <details
+                                    key={menu.id}
+                                    className="border-t border-black/10 pt-4"
+                                >
                                     <summary className="cursor-pointer list-none text-[12px] font-bold uppercase tracking-[0.18em] text-black">
                                         {menu.label}
                                     </summary>
@@ -786,6 +1001,22 @@ const Header = () => {
                             ))}
 
                             <div className="grid gap-3 border-t border-black/10 pt-4">
+                                {!isAuthenticated && (
+                                    <>
+                                        <AppLink
+                                            to="/sign-in"
+                                            className="text-[12px] font-bold uppercase tracking-[0.18em] text-black"
+                                        >
+                                            SIGN IN
+                                        </AppLink>
+                                        <AppLink
+                                            to="/sign-up"
+                                            className="text-[12px] font-bold uppercase tracking-[0.18em] text-black"
+                                        >
+                                            SIGN UP
+                                        </AppLink>
+                                    </>
+                                )}
                                 {merchandisingLinks.map((item) => (
                                     <AppLink
                                         key={item.label}
@@ -801,7 +1032,10 @@ const Header = () => {
                 )}
             </nav>
 
-            <div className="hidden lg:block" onMouseLeave={() => setActiveMenu(null)}>
+            <div
+                className="hidden lg:block"
+                onMouseLeave={() => setActiveMenu(null)}
+            >
                 <nav
                     aria-label="Main"
                     className="mx-auto flex max-w-[1440px] items-center gap-8 px-6"
@@ -838,12 +1072,15 @@ const Header = () => {
 
                 <div
                     className={`overflow-hidden border-t border-black/10 bg-white transition-[max-height,opacity] duration-200 ${
-                        activeMenu ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+                        activeMenu
+                            ? "max-h-[80vh] opacity-100"
+                            : "max-h-0 opacity-0"
                     }`}
                 >
                     <div className="mx-auto max-w-[1440px] px-6 py-8">
                         {renderDesktopMegaMenu(
-                            megaMenus.find((menu) => menu.id === activeMenu) || null,
+                            megaMenus.find((menu) => menu.id === activeMenu) ||
+                                null
                         )}
                     </div>
                 </div>

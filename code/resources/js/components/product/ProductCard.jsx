@@ -36,7 +36,9 @@ const ProductCard = ({
                         <p className="text-[10px] font-bold uppercase text-black/40 font-['Space Grotesk']">
                             Size: {size}
                         </p>
-                        <p className="text-sm font-bold font-['Inter']">{price}</p>
+                        <p className="text-sm font-bold font-['Inter']">
+                            {price}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -63,7 +65,9 @@ const ProductCard = ({
                     </p>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-base font-semibold text-black">{price}</span>
+                    <span className="text-base font-semibold text-black">
+                        {price}
+                    </span>
                     {badge && (
                         <span className="rounded-full border border-black/10 bg-[#f6f3ef] px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/60">
                             {badge}
