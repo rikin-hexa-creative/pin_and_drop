@@ -407,7 +407,7 @@ const quickActions = [
 ];
 
 const profileMenu = {
-    username: { label: "senyad5139", to: "/senyad5139" },
+    username: { label: "senyad5139", to: "/user-profile" },
     accountLinks: [
         { label: "FAVORITES", to: "/senyad5139/favorites" },
         { label: "SAVED", to: "/senyad5139/saved" },
