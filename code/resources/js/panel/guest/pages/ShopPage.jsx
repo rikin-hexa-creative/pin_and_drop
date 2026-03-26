@@ -1,213 +1,693 @@
+import {
+    startTransition,
+    useDeferredValue,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { Link } from "react-router-dom";
+import { useCategories } from "../../../apis/categories.api";
+import { useProductFilters, useProducts } from "../../../apis/product.api";
 import ProductCard from "../../../components/product/ProductCard";
 
-const navItems = ["Shop", "Designers", "Editorial", "Archive"];
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+});
 
-const filters = [
-    { icon: "sell", label: "Designers", active: true },
-    { icon: "category", label: "Categories" },
-    { icon: "straighten", label: "Sizes" },
-    { icon: "payments", label: "Price" },
+const navItems = [
+    { label: "Shop", to: "/my-feed", active: true },
+    { label: "Home", to: "/" },
+    { label: "Designers", to: "/my-feed#designers" },
+    { label: "Archive", to: "/my-feed#archive" },
 ];
 
-const products = [
-    {
-        brand: "Rick Owens",
-        title: "Archival Stooges Leather Jacket",
-        size: "48 (M)",
-        price: "$1,450",
-        badge: "New",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfHsVRJhepzWSQOL0mrubE9H8a4Ma5Yz-_h5OKuXvEwFXam8lE02Iaz-icMKy_ODZDEspvVyLhiT4giqHEZQ8evrnU2MTkunycQcWEzqJlSShRf4wGWdZ3TGzeod_kasbzmCpM1RnQaAn53ieSinsKIyfOz_8sB-JMzIQZ0A535ec456o3CyW1q62Xs4LpXGr9m5RBAdKmJlH4lwvrdR07TwELm2ltwKXdUXFr9reCtD119Uc0D_pSTPRrqF90zC4ey134M97xlwiq",
-    },
-    {
-        brand: "Maison Margiela",
-        title: "GAT Replica Sneakers 'White/Grey'",
-        size: "42",
-        price: "$425",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBR2rKM6XPDtfr5xw9Vqc5AFmUVi7SqdF0qSWr7hwAU7id66PehWsLx6MCRmPpzmYNH5yn8O8LMOnVIty5IKWDxbmm5crCX8WYJSEYo153mDtlc0k3dUV8jl7ynblWj2EEztUrhI-sC5O5Y7qBHvhm4glokCuJ3hGgkQSBRmOyo6rzp0SY5mU0sFIkWy6kW-UuAobuk7ymfZY0-7F3S6XaTL6-lJdYuqAYq-4bqe82iQ1C72873ltMtL6FfCOhSTer6Zl6p6yIiZoEp",
-    },
-    {
-        brand: "Jil Sander",
-        title: "Heavyweight Boxy Tee",
-        size: "L",
-        price: "$280",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC51X9xFEuNufzBbwPhFRijyXFmWmuSpkvrnZpDxHJDc2lVCP9qlUaLXaUnV3CoaM2MBaz2WS8PBhGt-77YN8Fp1iEOLZAPCrvq2__bjwWHMGvJJUBAEiYZhsq-CmWIwu6uCTJ7h8Lvsy-R4bJ1oT0RLdlZNfy9avCCx1u0s5mmqgiyQW48Cj1r937ggUe3fMpxNYgvxvSidId6m8gkyNjlxc3c2ttE383UNX91Mr4BxW2Zl3IVItvP-ixAnZ8oGP4C5cS_WTjdahQI",
-    },
-    {
-        brand: "Yohji Yamamoto",
-        title: "Pour Homme Gabardine Trousers",
-        size: "32",
-        price: "$690",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAKd4JuOQrg8vHH2bb-iQcPnhkk6mqzFk60zuChkqIY5nF3jH3pMGWGbJPUON-zTSzThCPcrLriHPquiBy8vHMK9COqe_5u3pfb04AVjoQ1MvWF7TDUIp_7unRH8umyYsXVolNXgFiHJv6LrDXSjigHGbu1k62Nnkza4V2oFlEz0FhgzstRRXSBmvPCL-s8sN_CuG8LGc24cripKWl27Yf9Xbi0NGhQ-SGk_ao7RavFRjmKWm1mUrmILv3UAMUnYW1ilBq7hM6QjrW3",
-    },
-    {
-        brand: "Helmut Lang",
-        title: "1998 Raw Denim Trucker",
-        size: "46 (S)",
-        price: "$850",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBsi_SJR4ESoaJ3fIteH8V5SyLuRe6pFK21l-vlEB7XIPvOH4uOIllRawWiELr-V-7JDNxpd9Hb_KZjO-3ui6zG-BLm0GAFtLDWT-PRKbM-Z3ZlNAg6hRHHr0-T-oYmCVHIZ9iGMr184d98i9ykCVX8bf0Du6mlpDKw7Obv_EhbZ10e27PiRrWX5dbJusGF6hwQhOEjOKJtYuIR1QpRQ2VLHjDp1rtlYiO6NCbwHkwnLZ9FTtAyGqWKfoIXQnwu1NbqzQeKbqEylPwc",
-    },
-    {
-        brand: "Prada",
-        title: "Technical Knit Half-Zip",
-        size: "M",
-        price: "$520",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3AgIgnnajIKVQE-4W-NVij2CeXqfhqT7xCZvtSbP5KN7oGSuq-RxjiT6zGfLcHDFCp9SinzlAlicly4Dyo7Cj2yv20xSh7LgAhrAybz0HLXjH3nqeId59Iu1UFIXdOfGfhfr6GXa4mQthIfatWcl_6ioA1dGKr44_fX02c47XGQ8-GNjUanx8PGlQtvNngphoWwHDfDmG0I05TR8q2Qhj837mpwIBEdTYrmquCo-Rs5_wu1-GwNAqRGrinhZjWbXw1Jr-4ta5iQVu",
-    },
-    {
-        brand: "Saint Laurent",
-        title: "Classic Chesterfield Wool Coat",
-        size: "50 (L)",
-        price: "$2,100",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB0jkQ9Z_8d2YZwCC89Ebed-mc-3lhzUCUbrbugiIPi-90JPdVvWX-JUbcoluf6Tspe6rp1Pcl9lkO-mbGsWIpL4N_YsWJzUL9juFi5zqd9H7i9pFXy9k9RqCAdcqlU6i7XFC1IyPCLZJ-LIZJ6qcvsNRRgicvS4gXbUH0WTvRZ1PpbdeRPz4V25NuyImgQfUs000DO62pgJIWYwUpj10zYy8p12BRx6zj4k2Qx9sP0zbOg9jZmoPFC9USY7bHD8TJd9G1hTdcB0f4A",
-    },
-    {
-        brand: "Balenciaga",
-        title: "WFP Oversized Hoodie Black",
-        size: "S (Fits L)",
-        price: "$640",
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDPDy31d2okfGby24I0SwxtLJ_EF_-vR39jy8CTfPYw99nfAmRAKKW1rs9MJpJkwlQd-McHg79A2iqO3DfZ4Punzikij2PE7QCoWdXN0ZMuHTt9uvTInIb3Td2Td7w3I9hVSV4bpBPbp40lgqW1Zxb6i2ngF6M1f1kfPDgfBZ-u4npfcFX46bZjNGCPEUookb2lqUtX5s5H9UBv8fXBRIzijafkSl4YLtijACvADkDzaS_G3WgKle20XFpjEF0EXVBk37SJR9ON_31Y",
-    },
+const sortOptions = [
+    { value: "latest", label: "Sort: Latest" },
+    { value: "price_asc", label: "Price: Low to High" },
+    { value: "price_desc", label: "Price: High to Low" },
 ];
+
+const toggleSelection = (values, value) =>
+    values.includes(value)
+        ? values.filter((currentValue) => currentValue !== value)
+        : [...values, value];
+
+const parsePriceValue = (value) => {
+    if (value === "") {
+        return undefined;
+    }
+
+    const parsedValue = Number(value);
+
+    return Number.isFinite(parsedValue) ? parsedValue : undefined;
+};
+
+const buildPriceLabel = (minPrice, maxPrice) => {
+    if (minPrice !== undefined && maxPrice !== undefined) {
+        return `${currencyFormatter.format(minPrice)} - ${currencyFormatter.format(maxPrice)}`;
+    }
+
+    if (minPrice !== undefined) {
+        return `${currencyFormatter.format(minPrice)}+`;
+    }
+
+    if (maxPrice !== undefined) {
+        return `Up to ${currencyFormatter.format(maxPrice)}`;
+    }
+
+    return "";
+};
+
+const LoadingCard = () => (
+    <div className="animate-pulse">
+        <div className="aspect-[3/4] bg-black/5" />
+        <div className="mt-4 space-y-2">
+            <div className="h-3 w-24 bg-black/8" />
+            <div className="h-4 w-3/4 bg-black/8" />
+            <div className="flex justify-between pt-2">
+                <div className="h-3 w-20 bg-black/8" />
+                <div className="h-4 w-16 bg-black/8" />
+            </div>
+        </div>
+    </div>
+);
+
+const FilterSection = ({ title, subtitle, children }) => (
+    <section className="space-y-4 border-t border-black/10 pt-5 first:border-t-0 first:pt-0">
+        <div>
+            <h3 className="text-xs font-bold uppercase tracking-[0.28em] text-black font-['Space_Grotesk']">
+                {title}
+            </h3>
+            {subtitle ? (
+                <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-black/40">
+                    {subtitle}
+                </p>
+            ) : null}
+        </div>
+        {children}
+    </section>
+);
+
+const FilterToggle = ({
+    active,
+    count,
+    label,
+    onClick,
+    swatch,
+    disabled = false,
+}) => (
+    <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className={`flex w-full items-center justify-between gap-3 border px-3 py-2 text-left transition ${
+            active
+                ? "border-black bg-black text-white"
+                : "border-black/10 bg-white text-black hover:border-black/40"
+        } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+    >
+        <span className="flex min-w-0 items-center gap-3">
+            {swatch ? (
+                <span
+                    className={`h-3 w-3 rounded-full border ${
+                        active ? "border-white/70" : "border-black/10"
+                    }`}
+                    style={{ backgroundColor: swatch }}
+                />
+            ) : null}
+            <span className="truncate text-[11px] font-bold uppercase tracking-[0.18em] font-['Space_Grotesk']">
+                {label}
+            </span>
+        </span>
+        {count !== undefined ? (
+            <span
+                className={`text-[10px] font-bold uppercase tracking-[0.16em] ${
+                    active ? "text-white/70" : "text-black/35"
+                }`}
+            >
+                {count}
+            </span>
+        ) : null}
+    </button>
+);
+
+const FiltersPanel = ({
+    categoryOptions,
+    colorOptions,
+    designerOptions,
+    maxPriceInput,
+    minPriceInput,
+    priceBounds,
+    selectedCategories,
+    selectedColors,
+    selectedDesigners,
+    selectedSizes,
+    sizeOptions,
+    onClearAll,
+    onMaxPriceChange,
+    onMinPriceChange,
+    onToggleCategory,
+    onToggleColor,
+    onToggleDesigner,
+    onToggleSize,
+}) => (
+    <div className="space-y-8">
+        <FilterSection title="Designers" subtitle="Approved vendors only">
+            <div className="space-y-2">
+                {designerOptions.length ? (
+                    designerOptions.map((designer) => (
+                        <FilterToggle
+                            key={designer.id ?? designer.name}
+                            active={selectedDesigners.includes(designer.name)}
+                            count={designer.products_count}
+                            label={designer.name}
+                            onClick={() => onToggleDesigner(designer.name)}
+                        />
+                    ))
+                ) : (
+                    <p className="text-xs text-black/45">No designer filters available.</p>
+                )}
+            </div>
+        </FilterSection>
+
+        <FilterSection title="Categories" subtitle="Approved categories only">
+            <div className="space-y-2">
+                {categoryOptions.length ? (
+                    categoryOptions.map((category) => (
+                        <FilterToggle
+                            key={category.id}
+                            active={selectedCategories.includes(category.id)}
+                            count={category.products_count}
+                            label={category.name}
+                            onClick={() => onToggleCategory(category.id)}
+                        />
+                    ))
+                ) : (
+                    <p className="text-xs text-black/45">No category filters available.</p>
+                )}
+            </div>
+        </FilterSection>
+
+        <FilterSection title="Sizes" subtitle="From active product variants">
+            <div className="space-y-2">
+                {sizeOptions.length ? (
+                    sizeOptions.map((size) => (
+                        <FilterToggle
+                            key={size.name}
+                            active={selectedSizes.includes(size.name)}
+                            count={size.products_count}
+                            label={size.name}
+                            onClick={() => onToggleSize(size.name)}
+                        />
+                    ))
+                ) : (
+                    <p className="text-xs text-black/45">No size filters available.</p>
+                )}
+            </div>
+        </FilterSection>
+
+        <FilterSection title="Colors" subtitle="Variant colors in stock feed">
+            <div className="space-y-2">
+                {colorOptions.length ? (
+                    colorOptions.map((color) => (
+                        <FilterToggle
+                            key={color.value}
+                            active={selectedColors.includes(color.value)}
+                            count={color.products_count}
+                            label={color.value}
+                            onClick={() => onToggleColor(color.value)}
+                            swatch={color.value}
+                        />
+                    ))
+                ) : (
+                    <p className="text-xs text-black/45">No color filters available.</p>
+                )}
+            </div>
+        </FilterSection>
+
+        <FilterSection title="Price" subtitle="Filter by catalog range">
+            <div className="grid grid-cols-2 gap-3">
+                <label className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40">
+                        Min
+                    </span>
+                    <input
+                        type="number"
+                        min="0"
+                        value={minPriceInput}
+                        onChange={(event) => onMinPriceChange(event.target.value)}
+                        placeholder={
+                            priceBounds.min
+                                ? String(Math.floor(priceBounds.min))
+                                : "0"
+                        }
+                        className="w-full border border-black/10 bg-white px-3 py-2 text-sm focus:border-black focus:outline-none"
+                    />
+                </label>
+                <label className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40">
+                        Max
+                    </span>
+                    <input
+                        type="number"
+                        min="0"
+                        value={maxPriceInput}
+                        onChange={(event) => onMaxPriceChange(event.target.value)}
+                        placeholder={
+                            priceBounds.max
+                                ? String(Math.ceil(priceBounds.max))
+                                : "0"
+                        }
+                        className="w-full border border-black/10 bg-white px-3 py-2 text-sm focus:border-black focus:outline-none"
+                    />
+                </label>
+            </div>
+
+            {priceBounds.max > 0 ? (
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
+                    Available: {currencyFormatter.format(priceBounds.min)} to{" "}
+                    {currencyFormatter.format(priceBounds.max)}
+                </p>
+            ) : null}
+        </FilterSection>
+
+        <button
+            type="button"
+            onClick={onClearAll}
+            className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#bc0000] transition-opacity hover:opacity-80 font-['Space_Grotesk']"
+        >
+            Clear All
+        </button>
+    </div>
+);
 
 const ShopPage = () => {
+    const [searchInput, setSearchInput] = useState("");
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedDesigners, setSelectedDesigners] = useState([]);
+    const [selectedSizes, setSelectedSizes] = useState([]);
+    const [selectedColors, setSelectedColors] = useState([]);
+    const [sort, setSort] = useState("latest");
+    const [minPriceInput, setMinPriceInput] = useState("");
+    const [maxPriceInput, setMaxPriceInput] = useState("");
+    const loadMoreRef = useRef(null);
+
+    const deferredSearch = useDeferredValue(searchInput.trim());
+    const deferredMinPrice = useDeferredValue(minPriceInput);
+    const deferredMaxPrice = useDeferredValue(maxPriceInput);
+    const minPrice = parsePriceValue(deferredMinPrice);
+    const maxPrice = parsePriceValue(deferredMaxPrice);
+
+    const { data: categories = [], error: categoriesError } = useCategories();
+    const {
+        data: filterData = {},
+        error: filterError,
+        isLoading: isFilterLoading,
+    } = useProductFilters();
+
+    const productParams = {
+        search: deferredSearch || undefined,
+        category: selectedCategories,
+        designer: selectedDesigners,
+        size: selectedSizes,
+        color: selectedColors,
+        sort,
+        min_price: minPrice,
+        max_price: maxPrice,
+        per_page: 12,
+    };
+
+    const {
+        data,
+        error: productsError,
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+        isLoading,
+    } = useProducts(productParams);
+
+    useEffect(() => {
+        const target = loadMoreRef.current;
+
+        if (!target || !hasNextPage) {
+            return undefined;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const firstEntry = entries[0];
+
+                if (
+                    firstEntry?.isIntersecting &&
+                    hasNextPage &&
+                    !isFetchingNextPage
+                ) {
+                    fetchNextPage();
+                }
+            },
+            {
+                rootMargin: "280px 0px",
+            }
+        );
+
+        observer.observe(target);
+
+        return () => observer.disconnect();
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+    const categoryOptions =
+        categories.length > 0 ? categories : filterData.categories ?? [];
+    const designerOptions = filterData.designers ?? [];
+    const sizeOptions = filterData.sizes ?? [];
+    const colorOptions = filterData.colors ?? [];
+    const priceBounds = filterData.price_range ?? { min: 0, max: 0 };
+    const productPages = data?.pages ?? [];
+    const products = productPages.flatMap((page) => page?.data ?? []);
+    const totalProducts = productPages[0]?.meta?.total ?? 0;
+    const activeFilterCount =
+        selectedCategories.length +
+        selectedDesigners.length +
+        selectedSizes.length +
+        selectedColors.length +
+        (deferredSearch ? 1 : 0) +
+        (minPrice !== undefined || maxPrice !== undefined ? 1 : 0);
+
+    const onToggleCategory = (value) => {
+        startTransition(() => {
+            setSelectedCategories((currentValues) =>
+                toggleSelection(currentValues, value)
+            );
+        });
+    };
+
+    const onToggleDesigner = (value) => {
+        startTransition(() => {
+            setSelectedDesigners((currentValues) =>
+                toggleSelection(currentValues, value)
+            );
+        });
+    };
+
+    const onToggleSize = (value) => {
+        startTransition(() => {
+            setSelectedSizes((currentValues) =>
+                toggleSelection(currentValues, value)
+            );
+        });
+    };
+
+    const onToggleColor = (value) => {
+        startTransition(() => {
+            setSelectedColors((currentValues) =>
+                toggleSelection(currentValues, value)
+            );
+        });
+    };
+
+    const clearAllFilters = () => {
+        startTransition(() => {
+            setSearchInput("");
+            setSelectedCategories([]);
+            setSelectedDesigners([]);
+            setSelectedSizes([]);
+            setSelectedColors([]);
+            setSort("latest");
+            setMinPriceInput("");
+            setMaxPriceInput("");
+        });
+    };
+
+    const categoryLookup = new Map(
+        categoryOptions.map((category) => [category.id, category.name])
+    );
+
+    const activeFilterChips = [
+        ...selectedDesigners.map((designer) => ({
+            key: `designer-${designer}`,
+            label: designer,
+            onRemove: () => onToggleDesigner(designer),
+        })),
+        ...selectedCategories.map((categoryId) => ({
+            key: `category-${categoryId}`,
+            label: categoryLookup.get(categoryId) ?? `Category ${categoryId}`,
+            onRemove: () => onToggleCategory(categoryId),
+        })),
+        ...selectedSizes.map((size) => ({
+            key: `size-${size}`,
+            label: `Size ${size}`,
+            onRemove: () => onToggleSize(size),
+        })),
+        ...selectedColors.map((color) => ({
+            key: `color-${color}`,
+            label: `Color ${color}`,
+            onRemove: () => onToggleColor(color),
+        })),
+    ];
+
+    if (deferredSearch) {
+        activeFilterChips.unshift({
+            key: "search",
+            label: `Search: ${deferredSearch}`,
+            onRemove: () => setSearchInput(""),
+        });
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+        activeFilterChips.push({
+            key: "price",
+            label: `Price: ${buildPriceLabel(minPrice, maxPrice)}`,
+            onRemove: () => {
+                setMinPriceInput("");
+                setMaxPriceInput("");
+            },
+        });
+    }
+
     return (
         <div className="bg-[#fbf9f8] text-[#1b1c1c] selection:bg-black selection:text-white">
-            <nav className="fixed top-0 z-50 flex h-20 w-full items-center justify-between border-none bg-[#fbf9f8]/95 px-8 backdrop-blur-xl">
-                <div className="text-2xl font-black uppercase tracking-tighter text-black font-['Inter']">
-                    THE DIGITAL CURATOR
-                </div>
-                <div className="hidden items-center gap-8 md:flex">
-                    {navItems.map((item) => (
-                        <a
-                            key={item}
-                            href="#"
-                            className={`font-['Inter'] font-black uppercase tracking-tighter transition-colors duration-150 ${
-                                item === "Shop"
-                                    ? "border-b-2 border-black pb-1 text-black"
-                                    : "text-black/50 hover:text-black"
-                            }`}
-                        >
-                            {item}
-                        </a>
-                    ))}
-                </div>
-                <div className="flex items-center gap-6">
-                    <button
-                        className="transition-transform active:scale-95"
-                        type="button"
-                    >
-                        <span className="material-symbols-outlined text-black">
-                            shopping_bag
-                        </span>
-                    </button>
-                    <button
-                        className="transition-transform active:scale-95"
-                        type="button"
-                    >
-                        <span className="material-symbols-outlined text-black">
-                            person
-                        </span>
-                    </button>
-                </div>
-            </nav>
 
-            <main className="min-h-screen pt-24">
-                <div className="mx-auto flex max-w-[1600px] gap-12 px-8">
-                    <aside className="sticky top-24 hidden h-[calc(100vh-6rem)] w-64 flex-col gap-6 overflow-y-auto bg-[#fbf9f8] pt-8 lg:flex">
-                        <div className="mb-4">
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-black font-['Space Grotesk']">
+            <main className="min-h-screen pt-8">
+                <div className="mx-auto flex max-w-[1600px] gap-12 px-4 pb-20 sm:px-8">
+                    <aside className="sticky top-24 hidden h-[calc(auto)] w-72  bg-[#fbf9f8] pt-8 lg:block">
+                        <div className="mb-6">
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-black font-['Space_Grotesk']">
                                 Filter
                             </h2>
                             <p className="mt-1 text-[10px] uppercase tracking-widest text-black/40">
                                 Refine Selection
                             </p>
                         </div>
-                        <div className="space-y-8">
-                            {filters.map((filter) => (
-                                <div
-                                    key={filter.label}
-                                    className="group cursor-pointer"
-                                >
-                                    <div
-                                        className={`flex items-center gap-3 font-bold transition-all ${
-                                            filter.active
-                                                ? "text-black"
-                                                : "text-black/40 group-hover:text-black"
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined">
-                                            {filter.icon}
-                                        </span>
-                                        <span className="text-xs uppercase tracking-widest font-['Space Grotesk']">
-                                            {filter.label}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-auto pb-8">
-                            <button
-                                className="text-[10px] font-bold uppercase tracking-widest text-[#bc0000] transition-opacity hover:opacity-80 font-['Space Grotesk']"
-                                type="button"
-                            >
-                                Clear All
-                            </button>
-                        </div>
+
+                        <FiltersPanel
+                            categoryOptions={categoryOptions}
+                            colorOptions={colorOptions}
+                            designerOptions={designerOptions}
+                            maxPriceInput={maxPriceInput}
+                            minPriceInput={minPriceInput}
+                            priceBounds={priceBounds}
+                            selectedCategories={selectedCategories}
+                            selectedColors={selectedColors}
+                            selectedDesigners={selectedDesigners}
+                            selectedSizes={selectedSizes}
+                            sizeOptions={sizeOptions}
+                            onClearAll={clearAllFilters}
+                            onMaxPriceChange={setMaxPriceInput}
+                            onMinPriceChange={setMinPriceInput}
+                            onToggleCategory={onToggleCategory}
+                            onToggleColor={onToggleColor}
+                            onToggleDesigner={onToggleDesigner}
+                            onToggleSize={onToggleSize}
+                        />
                     </aside>
 
                     <section className="flex-1">
-                        <div className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
-                            <div className="w-full md:max-w-md">
-                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest font-['Space Grotesk']">
+                        <div className="mb-8 rounded-[28px] border border-black/8 bg-white/70 p-5 lg:hidden">
+                            <details>
+                                <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-[0.28em] text-black font-['Space_Grotesk']">
+                                    Filters {activeFilterCount ? `(${activeFilterCount})` : ""}
+                                </summary>
+                                <div className="mt-6">
+                                    <FiltersPanel
+                                        categoryOptions={categoryOptions}
+                                        colorOptions={colorOptions}
+                                        designerOptions={designerOptions}
+                                        maxPriceInput={maxPriceInput}
+                                        minPriceInput={minPriceInput}
+                                        priceBounds={priceBounds}
+                                        selectedCategories={selectedCategories}
+                                        selectedColors={selectedColors}
+                                        selectedDesigners={selectedDesigners}
+                                        selectedSizes={selectedSizes}
+                                        sizeOptions={sizeOptions}
+                                        onClearAll={clearAllFilters}
+                                        onMaxPriceChange={setMaxPriceInput}
+                                        onMinPriceChange={setMinPriceInput}
+                                        onToggleCategory={onToggleCategory}
+                                        onToggleColor={onToggleColor}
+                                        onToggleDesigner={onToggleDesigner}
+                                        onToggleSize={onToggleSize}
+                                    />
+                                </div>
+                            </details>
+                        </div>
+
+                        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                            <div className="w-full md:max-w-lg">
+                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest font-['Space_Grotesk']">
                                     Search Archive
                                 </label>
                                 <div className="group relative">
                                     <input
-                                        className="w-full border-b border-black/20 bg-transparent px-0 py-2 text-sm uppercase tracking-tighter placeholder:text-black/20 focus:border-black focus:outline-none focus:ring-0 font-['Inter']"
-                                        placeholder="Search by designer, item, or era"
-                                        type="text"
+                                        value={searchInput}
+                                        onChange={(event) =>
+                                            setSearchInput(event.target.value)
+                                        }
+                                        className="w-full border-b border-black/20 bg-transparent px-0 py-2 pr-8 text-sm uppercase tracking-tighter placeholder:text-black/20 focus:border-black focus:outline-none focus:ring-0 font-['Inter']"
+                                        placeholder="Search by product, designer, or category"
+                                        type="search"
                                     />
                                     <span className="material-symbols-outlined absolute bottom-2 right-0 text-black/40">
                                         search
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+
+                            <div className="flex flex-wrap items-center gap-4">
                                 <div className="relative">
-                                    <select className="cursor-pointer appearance-none border-none bg-transparent pr-8 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-0 font-['Space Grotesk']">
-                                        <option>Sort: Default</option>
-                                        <option>Price: Low to High</option>
-                                        <option>Price: High to Low</option>
-                                        <option>Newest Arrivals</option>
+                                    <select
+                                        value={sort}
+                                        onChange={(event) =>
+                                            startTransition(() =>
+                                                setSort(event.target.value)
+                                            )
+                                        }
+                                        className="cursor-pointer appearance-none border-none bg-transparent pr-8 text-[10px] font-bold uppercase tracking-widest focus:outline-none focus:ring-0 font-['Space_Grotesk']"
+                                    >
+                                        {sortOptions.map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
                                     </select>
                                     <span className="material-symbols-outlined pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs">
                                         expand_more
                                     </span>
                                 </div>
+
+                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 font-['Space_Grotesk']">
+                                    {isLoading
+                                        ? "Loading archive"
+                                        : `Viewing ${products.length} of ${totalProducts} items`}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {products.map((product) => (
-                                <ProductCard
-                                    key={product.title}
-                                    variant="shop"
-                                    {...product}
-                                />
-                            ))}
-                        </div>
+                        {activeFilterChips.length ? (
+                            <div className="mb-8 flex flex-wrap gap-3">
+                                {activeFilterChips.map((chip) => (
+                                    <button
+                                        key={chip.key}
+                                        type="button"
+                                        onClick={chip.onRemove}
+                                        className="inline-flex items-center gap-2 border border-black/10 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:border-black"
+                                    >
+                                        <span>{chip.label}</span>
+                                        <span className="material-symbols-outlined text-sm">
+                                            close
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : null}
 
-                        <div className="mt-20 flex flex-col items-center gap-6">
-                            <button
-                                className="bg-black px-12 py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-black/80 font-['Inter']"
-                                type="button"
-                            >
-                                Load More Pieces
-                            </button>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 font-['Space Grotesk']">
-                                Viewing 8 of 142 Items
-                            </p>
-                        </div>
+                        {(categoriesError || filterError || productsError) && (
+                            <div className="mb-8 border border-[#bc0000]/20 bg-[#fff4f2] px-4 py-3 text-sm text-[#8a1d16]">
+                                Something went wrong while loading the shop
+                                feed. Try refreshing the page.
+                            </div>
+                        )}
+
+                        {isFilterLoading && !categoryOptions.length ? (
+                            <div className="mb-8 text-xs uppercase tracking-[0.22em] text-black/35">
+                                Loading filters...
+                            </div>
+                        ) : null}
+
+                        {isLoading ? (
+                            <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {Array.from({ length: 8 }).map((_, index) => (
+                                    <LoadingCard key={index} />
+                                ))}
+                            </div>
+                        ) : products.length ? (
+                            <>
+                                <div
+                                    id="archive"
+                                    className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                                >
+                                    {products.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            variant="shop"
+                                            brand={product.brand}
+                                            badge={product.badge}
+                                            image={product.image}
+                                            price={product.price_formatted}
+                                            size={product.size}
+                                            title={product.name}
+                                            to={`/product/${product.id}`}
+                                        />
+                                    ))}
+                                </div>
+
+                                <div
+                                    ref={loadMoreRef}
+                                    className="mt-16 flex flex-col items-center gap-5"
+                                >
+                                    {hasNextPage ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchNextPage()}
+                                            disabled={isFetchingNextPage}
+                                            className="bg-black px-12 py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-black/80 disabled:cursor-not-allowed disabled:bg-black/40 font-['Inter']"
+                                        >
+                                            {isFetchingNextPage
+                                                ? "Loading More Pieces"
+                                                : "Load More Pieces"}
+                                        </button>
+                                    ) : (
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/35 font-['Space_Grotesk']">
+                                            All matching items loaded
+                                        </p>
+                                    )}
+
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 font-['Space_Grotesk']">
+                                        {isFetching && !isFetchingNextPage
+                                            ? "Refreshing results..."
+                                            : `Viewing ${products.length} of ${totalProducts} items`}
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="rounded-[32px] border border-black/10 bg-white px-6 py-12 text-center">
+                                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-black/45">
+                                    No active products matched these filters
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={clearAllFilters}
+                                    className="mt-5 border border-black px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-black transition hover:bg-black hover:text-white"
+                                >
+                                    Reset Filters
+                                </button>
+                            </div>
+                        )}
                     </section>
                 </div>
             </main>
@@ -219,18 +699,18 @@ const ShopPage = () => {
                 <div className="flex flex-wrap gap-6 md:gap-8">
                     {["Privacy", "Terms", "Accessibility", "Contact"].map(
                         (item) => (
-                            <a
+                            <Link
                                 key={item}
-                                href="#"
-                                className="text-[10px] uppercase tracking-widest text-black/60 transition-colors hover:text-black font-['Space Grotesk']"
+                                to="/"
+                                className="text-[10px] uppercase tracking-widest text-black/60 transition-colors hover:text-black font-['Space_Grotesk']"
                             >
                                 {item}
-                            </a>
+                            </Link>
                         )
                     )}
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-black/40 font-['Space Grotesk']">
-                    © 2024 THE DIGITAL CURATOR. ALL RIGHTS RESERVED.
+                <div className="text-[10px] uppercase tracking-widest text-black/40 font-['Space_Grotesk']">
+                    (C) 2026 THE DIGITAL CURATOR. ALL RIGHTS RESERVED.
                 </div>
             </footer>
         </div>

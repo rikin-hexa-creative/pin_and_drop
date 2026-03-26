@@ -4,21 +4,24 @@ import Header from "../../../components/site/Header";
 
 const Layout = () => {
     const location = useLocation();
-    const isShopPage = location.pathname.startsWith("/shop");
+    const isImmersivePage =
+        location.pathname.startsWith("/shop") ||
+        location.pathname.startsWith("/my-feed") ||
+        location.pathname.startsWith("/product/");
 
     return (
         <div
             className={
-                isShopPage
+                isImmersivePage
                     ? "min-h-screen bg-[#fbf9f8] text-[#1b1c1c]"
                     : "min-h-screen bg-[#f6f3ef] text-[#111111]"
             }
         >
-            {!isShopPage && <Header />}
-            <main className={isShopPage ? "min-h-screen" : "min-h-[70vh]"}>
+            <Header />
+            <main className="min-h-screen">
                 <Outlet />
             </main>
-            {!isShopPage && <Footer />}
+            <Footer />
         </div>
     );
 };

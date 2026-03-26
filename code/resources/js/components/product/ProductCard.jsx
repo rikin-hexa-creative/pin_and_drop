@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const ProductCard = ({
     variant = "home",
     title,
@@ -7,23 +9,30 @@ const ProductCard = ({
     brand,
     badge,
     animationDelay,
+    to,
 }) => {
     if (variant === "shop") {
-        return (
-            <div className="group cursor-pointer">
+        const content = (
+            <>
                 <div className="relative aspect-[3/4] overflow-hidden bg-[#f5f3f3]">
-                    <img
-                        src={image}
-                        alt={title}
-                        className="h-full w-full object-cover grayscale transition-transform duration-700 group-hover:scale-105"
-                    />
-                    {badge && (
-                        <div className="absolute right-4 top-4 bg-white px-2 py-1">
+                    {image ? (
+                        <img
+                            src={image}
+                            alt={title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#e7e2dd,#f7f4f1)] px-6 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-black/35 font-['Space_Grotesk']">
+                            No Image
+                        </div>
+                    )}
+                    {/* {badge && (
+                        <div className="absolute right-2 top-2 rounded-full border border-black/10 bg-white ">
                             <span className="text-[10px] font-bold uppercase tracking-tighter font-['Space Grotesk']">
                                 {badge}
                             </span>
                         </div>
-                    )}
+                    )} */}
                 </div>
                 <div className="mt-4 space-y-1">
                     {brand && (
@@ -41,6 +50,20 @@ const ProductCard = ({
                         </p>
                     </div>
                 </div>
+            </>
+        );
+
+        if (to) {
+            return (
+                <Link to={to} className="group block cursor-pointer">
+                    {content}
+                </Link>
+            );
+        }
+
+        return (
+            <div className="group cursor-pointer">
+                {content}
             </div>
         );
     }

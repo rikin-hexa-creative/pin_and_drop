@@ -16,7 +16,13 @@ return new class extends Migration
             $table->foreignId('created_by_vendor')->nullable()->constrained('vendors')->nullOnDelete()->after('created_by');
         });
 
-        DB::statement('ALTER TABLE categories MODIFY created_by BIGINT UNSIGNED NULL');
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->unsignedBigInteger('created_by')->nullable()->change();
+            });
+        } else {
+            DB::statement('ALTER TABLE categories MODIFY created_by BIGINT UNSIGNED NULL');
+        }
 
         // Approve existing admin-created categories so they remain selectable.
         DB::table('categories')
@@ -37,6 +43,12 @@ return new class extends Migration
             $table->dropColumn(['approved_at', 'is_approved']);
         });
 
-        DB::statement('ALTER TABLE categories MODIFY created_by BIGINT UNSIGNED NOT NULL');
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->unsignedBigInteger('created_by')->nullable(false)->change();
+            });
+        } else {
+            DB::statement('ALTER TABLE categories MODIFY created_by BIGINT UNSIGNED NOT NULL');
+        }
     }
 };

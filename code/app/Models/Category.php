@@ -88,6 +88,11 @@ class Category extends Model
         return $query->where('is_approved', true);
     }
 
+    public function scopeVisibleInCatalog($query)
+    {
+        return $query->approved()->active();
+    }
+
     public function scopeRootOnly($query)
     {
         return $query->whereNull('parent_id');

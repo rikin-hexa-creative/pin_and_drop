@@ -121,9 +121,39 @@ class Product extends Model
         return $query->where('category_id', $categoryId);
     }
 
+    public function scopePublicCatalog($query)
+    {
+        return $query
+            ->active()
+            ->whereHas('vendor', fn ($vendorQuery) => $vendorQuery->approved())
+            ->whereHas('category', fn ($categoryQuery) => $categoryQuery->approved()->active());
+    }
+
     public function scopePriceRange($query, float $min, float $max)
     {
         return $query->whereBetween('base_price', [$min, $max]);
+    }
+
+    public static function catalogPriceExpression(): string
+    {
+        return <<<'SQL'
+COALESCE(
+    (
+        SELECT MIN(
+            COALESCE(
+                product_variants.offer_price,
+                product_variants.selling_price,
+                product_variants.actual_price,
+                products.discount_price,
+                products.base_price
+            )
+        )
+        FROM product_variants
+        WHERE product_variants.product_id = products.id
+    ),
+    COALESCE(products.discount_price, products.base_price)
+)
+SQL;
     }
 
     // -------------------------------------------------------------------------
