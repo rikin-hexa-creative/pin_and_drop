@@ -2,10 +2,12 @@ import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
+import { useVendorMenu } from "../../apis/vendor.api";
+import { useCategoryMenu } from "../../apis/categories.api";
 
 const APP_ROUTES = new Set(["/", "/shop"]);
 
-const vendorsMenu = {
+const fallbackVendorsMenu = {
     id: "vendors",
     label: "Vendors",
     title: "Shop Popular vendors",
@@ -60,7 +62,7 @@ const vendorsMenu = {
     ],
 };
 
-const menswearMenu = {
+const fallbackMenswearMenu = {
     id: "menswear",
     label: "MENSWEAR",
     title: "Shop By Category",
@@ -190,7 +192,7 @@ const menswearMenu = {
     ],
 };
 
-const womenswearMenu = {
+const fallbackWomenswearMenu = {
     id: "womenswear",
     label: "WOMENSWEAR",
     title: "Shop By Category",
@@ -392,34 +394,29 @@ const womenswearMenu = {
     ],
 };
 
-const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
+// const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
 
-const merchandisingLinks = [
-    { label: "SNEAKERS", to: "/categories/sneakers" },
-    { label: "STAFF PICKS", to: "/shop/staff-picks" },
-    { label: "COLLECTIONS", to: "/collections" },
-    { label: "EDITORIAL", to: "/drycleanonly" },
-];
+const merchandisingLinks = [{ label: "COLLECTIONS", to: "/collections" }];
 
 const quickActions = [
-    { label: "SELL", to: "/sell/new", bordered: true },
+    { label: "SELL", to: "/sell", bordered: true },
     { label: "MY FEED", to: "/my-feed" },
 ];
 
 const profileMenu = {
     username: { label: "senyad5139", to: "/user-profile" },
     accountLinks: [
-        { label: "FAVORITES", to: "/senyad5139/favorites" },
-        { label: "SAVED", to: "/senyad5139/saved" },
-        { label: "CLOSET", to: "/senyad5139/closet" },
-        { label: "ORDERS", to: "/users/purchases" },
+        // { label: "FAVORITES", to: "/favorites" },
+        { label: "PIN", to: "/pin" },
+        { label: "CART", to: "/cart" },
+        { label: "ORDERS", to: "/orders" },
     ],
     selling: {
         heading: { label: "SELLING", to: "/sell/for-sale" },
         links: [
             { label: "FOR SALE", to: "/sell/for-sale" },
             { label: "SOLD", to: "/sell/sold" },
-            { label: "DRAFTS", to: "/sell/drafts" },
+            // { label: "DRAFTS", to: "/sell/drafts" },
         ],
     },
     settings: {
@@ -640,6 +637,14 @@ const renderMobileMegaMenu = (menu) => {
 
 const Header = () => {
     const { user, setUser } = useUser();
+    const { data: vendorsMenuData } = useVendorMenu();
+    const { data: categoriesMenuData } = useCategoryMenu();
+
+    const vendorsMenu = vendorsMenuData || fallbackVendorsMenu;
+    const menswearMenu = categoriesMenuData?.menswear || fallbackMenswearMenu;
+    const womenswearMenu = categoriesMenuData?.womenswear || fallbackWomenswearMenu;
+    
+    const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
 
     const [activeMenu, setActiveMenu] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -649,7 +654,7 @@ const Header = () => {
     const userDisplayName =
         user?.full_name || user?.email || profileMenu.username.label;
     const userAvatar =
-         '/storage/'+ user?.avatar ||
+        "/storage/" + user?.avatar ||
         "https://media-assets.grailed.com/prd/misc/PVEFHQYACL92VZTZETOTVQNFENXZW7S5U0MLUG";
 
     useEffect(() => {
@@ -790,16 +795,16 @@ const Header = () => {
                             </AppLink>
                         ))}
 
-                        <AppLink
+                        {/* <AppLink
                             to="/messages"
                             aria-label="Messages"
                             className="hidden h-10 w-10 items-center justify-center text-black transition hover:bg-black hover:text-white sm:inline-flex"
                         >
                             <MessageIcon />
-                        </AppLink>
+                        </AppLink> */}
 
                         <AppLink
-                            to="/mygrails/18550063"
+                            to="/pin"
                             aria-label="Favorites"
                             className="hidden h-10 w-10 items-center justify-center text-black transition hover:bg-black hover:text-white sm:inline-flex"
                         >

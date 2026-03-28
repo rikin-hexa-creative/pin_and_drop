@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 import { signIn } from "../../apis/user-auth.api";
 
 const SignInPage = () => {
+    const location = useLocation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { setUser } = useUser();
+    const redirectTo =
+        typeof location.state?.redirectTo === "string"
+            ? location.state.redirectTo
+            : "/";
     const [form, setForm] = useState({
         email: "",
         password: "",
@@ -39,7 +44,7 @@ const SignInPage = () => {
                 setUser(response.user);
                 queryClient.setQueryData(["getUserProfile"], response.user);
             }
-            navigate("/");
+            navigate(redirectTo);
         } catch (submitError) {
             const apiMessage =
                 submitError?.response?.data?.message ||

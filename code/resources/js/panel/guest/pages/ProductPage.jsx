@@ -1,6 +1,9 @@
+import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProductById } from "../../../apis/product.api";
+import { useCart } from "../../../context/CartWrapper";
+import PinModal from "../../../components/site/PinModal";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -87,13 +90,17 @@ const ProductPageSkeleton = () => (
 );
 
 const ProductPage = () => {
+    const navigate = useNavigate();
     const { id } = useParams();
     const { data: product, error, isLoading } = useProductById(id);
+    const { addToCart } = useCart();
     const [selectedVariantId, setSelectedVariantId] = useState(null);
     const [selectedImageId, setSelectedImageId] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [isSaved, setIsSaved] = useState(false);
     const [showSizeChart, setShowSizeChart] = useState(false);
+    const [isAddedToCart, setIsAddedToCart] = useState(false);
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
     useEffect(() => {
         if (!product) {
@@ -217,6 +224,34 @@ const ProductPage = () => {
         setQuantity((currentValue) =>
             Math.min(availableQuantity, currentValue + 1)
         );
+    };
+
+    const handleAddToCart = () => {
+        if (!product?.id || !selectedVariant?.id || !selectedVariant?.in_stock) {
+            return;
+        }
+        addToCart(product, selectedVariant, quantity);
+        setIsAddedToCart(true);
+        setTimeout(() => setIsAddedToCart(false), 2000);
+    };
+
+    const handleBuyNow = () => {
+        if (!product?.id || !selectedVariant?.id || !selectedVariant?.in_stock) {
+            return;
+        }
+
+        const checkoutUrl = `/checkout?productId=${product.id}&variantId=${selectedVariant.id}&quantity=${quantity}`;
+
+        if (Cookies.get("user_token")) {
+            navigate(checkoutUrl);
+            return;
+        }
+
+        navigate("/sign-in", {
+            state: {
+                redirectTo: checkoutUrl,
+            },
+        });
     };
 
     if (isLoading) {
@@ -495,29 +530,29 @@ const ProductPage = () => {
 
                                 <button
                                     type="button"
+                                    onClick={handleAddToCart}
                                     disabled={!selectedVariant?.in_stock}
                                     className="flex-1 bg-black py-4 font-['Inter'] text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-black/35"
                                 >
                                     {selectedVariant?.in_stock
-                                        ? "Add To Cart"
+                                        ? isAddedToCart ? "Added To Cart" : "Add To Cart"
                                         : "Out Of Stock"}
                                 </button>
 
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setIsSaved((currentValue) => !currentValue)
-                                    }
-                                    aria-pressed={isSaved}
+                                    onClick={() => {
+                                        if (!Cookies.get("user_token")) {
+                                            navigate("/sign-in", { state: { redirectTo: window.location.pathname } });
+                                            return;
+                                        }
+                                        setIsPinModalOpen(true);
+                                    }}
                                     className="border border-zinc-300 p-4 transition-colors hover:bg-[#efeded]"
                                 >
                                     <span
                                         className="material-symbols-outlined"
-                                        style={{
-                                            fontVariationSettings: isSaved
-                                                ? "'FILL' 1"
-                                                : "'FILL' 0",
-                                        }}
+                                        style={{ fontVariationSettings: "'FILL' 0" }}
                                     >
                                         bookmark
                                     </span>
@@ -526,6 +561,7 @@ const ProductPage = () => {
 
                             <button
                                 type="button"
+                                onClick={handleBuyNow}
                                 disabled={!selectedVariant?.in_stock}
                                 className="w-full border-2 border-black py-4 font-['Inter'] text-sm font-black uppercase tracking-widest transition-all hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/25 disabled:text-black/30"
                             >
@@ -669,6 +705,11 @@ const ProductPage = () => {
                     </Link>
                 ))}
             </nav>
+            <PinModal 
+                isOpen={isPinModalOpen} 
+                onClose={() => setIsPinModalOpen(false)} 
+                productId={product.id} 
+            />
         </div>
     );
 };

@@ -3,6 +3,8 @@
 use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
@@ -13,6 +15,7 @@ use App\Models\UserAddress;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
@@ -378,4 +381,126 @@ it('returns dynamic product detail data for a public catalog product', function 
         ->assertJsonPath('data.variants.0.size', '48')
         ->assertJsonPath('data.variants.0.price', 350)
         ->assertJsonPath('data.gallery.0.src', url('storage/products/detail-jacket-main.jpg'));
+});
+
+it('returns checkout defaults for the authenticated user', function () {
+    $user = createUser([
+        'full_name' => 'Checkout User',
+        'email' => 'checkout@example.com',
+        'phone' => '03001234567',
+    ]);
+    $address = createAddress($user, [
+        'label' => 'Studio',
+        'city' => 'Karachi',
+    ]);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->getJson('/api/checkout');
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('data.customer.full_name', 'Checkout User')
+        ->assertJsonPath('data.customer.email', 'checkout@example.com')
+        ->assertJsonPath('data.default_address.id', $address->id)
+        ->assertJsonPath('data.default_address.city', 'Karachi')
+        ->assertJsonPath('data.payment_methods.0.value', 'cod');
+});
+
+it('creates an order, payment, and decrements stock during checkout', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, ['business_name' => 'Checkout Studio']);
+    $category = createCategory($admin, ['name' => 'Outerwear']);
+    $product = createProduct($vendor, $category, [
+        'name' => 'Checkout Coat',
+        'base_price' => 520,
+    ]);
+    $variant = createVariant($product, [
+        'size' => 'L',
+        'color' => '#000000',
+        'stock_qty' => 5,
+        'actual_price' => 520,
+        'selling_price' => 470,
+        'offer_price' => 430,
+    ]);
+
+    $user = createUser([
+        'full_name' => 'Buyer One',
+        'phone' => '03005551234',
+    ]);
+    createAddress($user, ['is_default' => true]);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson('/api/checkout', [
+        'product_id' => $product->id,
+        'variant_id' => $variant->id,
+        'quantity' => 2,
+        'payment_method' => 'cod',
+        'notes' => 'Leave at reception.',
+        'save_as_default' => true,
+        'shipping_address' => [
+            'label' => 'Office',
+            'full_name' => 'Buyer One',
+            'phone' => '03005551234',
+            'address_line1' => '45 Archive Avenue',
+            'address_line2' => 'Floor 3',
+            'city' => 'Lahore',
+            'state' => 'Punjab',
+            'postal_code' => '54000',
+            'country' => 'Pakistan',
+        ],
+    ]);
+
+    $response
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'pending')
+        ->assertJsonPath('data.payment_status', 'pending')
+        ->assertJsonPath('data.payment_method', 'cod')
+        ->assertJsonPath('data.item.product_name', 'Checkout Coat')
+        ->assertJsonPath('data.item.quantity', 2)
+        ->assertJsonPath('data.grand_total', 860)
+        ->assertJsonPath('data.discount_amount', 180);
+
+    expect(Order::count())->toBe(1);
+    expect(OrderItem::count())->toBe(1);
+    expect(Payment::count())->toBe(1);
+    expect($variant->fresh()->stock_qty)->toBe(3);
+});
+
+it('rejects checkout when requested quantity exceeds stock', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, ['business_name' => 'Stock Studio']);
+    $category = createCategory($admin, ['name' => 'Accessories']);
+    $product = createProduct($vendor, $category, ['name' => 'Limited Bag']);
+    $variant = createVariant($product, [
+        'stock_qty' => 1,
+        'offer_price' => 180,
+    ]);
+    $user = createUser();
+
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson('/api/checkout', [
+        'product_id' => $product->id,
+        'variant_id' => $variant->id,
+        'quantity' => 2,
+        'payment_method' => 'cod',
+        'shipping_address' => [
+            'full_name' => $user->full_name,
+            'phone' => '03001112222',
+            'address_line1' => '10 Stock Lane',
+            'city' => 'Islamabad',
+            'postal_code' => '44000',
+            'country' => 'Pakistan',
+        ],
+    ]);
+
+    $response
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('quantity');
+
+    expect(Order::count())->toBe(0);
+    expect(Payment::count())->toBe(0);
+    expect($variant->fresh()->stock_qty)->toBe(1);
 });

@@ -7,6 +7,7 @@ const Layout = () => {
     const isImmersivePage =
         location.pathname.startsWith("/shop") ||
         location.pathname.startsWith("/my-feed") ||
+        location.pathname.startsWith("/checkout") ||
         location.pathname.startsWith("/product/");
 
     return (

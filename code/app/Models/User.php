@@ -77,6 +77,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
     }
 
+    public function collections(): HasMany
+    {
+        return $this->hasMany(UserCollection::class);
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------

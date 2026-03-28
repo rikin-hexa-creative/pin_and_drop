@@ -97,6 +97,11 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function userCollections(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(UserCollection::class, 'product_user_collection');
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------

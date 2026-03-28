@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "./axios-instance.api";
 
 async function getVendors(params) {
@@ -20,4 +21,17 @@ const useVendors = (params) => {
     });
 };
 
-export { useVendors };
+const useVendorMenu = () => {
+    return useQuery({
+        queryKey: ["vendorMenu"],
+        queryFn: async () => {
+            const res = await axiosInstance.get("/menus/vendors");
+            return res.data;
+        },
+        staleTime: 60 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
+};
+
+export { useVendors, useVendorMenu };
