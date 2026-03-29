@@ -116,11 +116,11 @@ const PinPage = () => {
                             className="flex flex-col space-y-4 group cursor-pointer"
                             onClick={() => navigate(`/pin/${collection.id}`)}
                         >
-                            <div className="relative grid grid-cols-3 grid-rows-4 gap-2 aspect-[4/5] bg-[#dbdad9]">
+                            <div className="max-h-[28rem] relative grid grid-cols-3 grid-rows-4  bg-[#dbdad9]">
                                 <div className="col-span-3 row-span-3 overflow-hidden bg-[#e9e8e7]">
                                     {collection.images[0] && (
                                         <img
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                                             src={collection.images[0]}
                                             alt={collection.name}
                                         />

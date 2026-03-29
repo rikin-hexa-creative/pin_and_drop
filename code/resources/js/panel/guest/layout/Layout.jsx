@@ -5,6 +5,7 @@ import Header from "../../../components/site/Header";
 const Layout = () => {
     const location = useLocation();
     const isImmersivePage =
+        location.pathname.startsWith("/cart") ||
         location.pathname.startsWith("/shop") ||
         location.pathname.startsWith("/my-feed") ||
         location.pathname.startsWith("/checkout") ||

@@ -24,6 +24,13 @@ class ProductImage extends Model
         ];
     }
 
+    protected $appends = ['src'];
+
+    public function getSrcAttribute(): string
+    {
+        return asset('storage/' . $this->image_url);
+    }
+
     // -------------------------------------------------------------------------
     // Relationships
     // -------------------------------------------------------------------------

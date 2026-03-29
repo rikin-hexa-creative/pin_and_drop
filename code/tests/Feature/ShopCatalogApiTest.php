@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Admin;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -130,6 +132,22 @@ function createOrder(User $user, UserAddress $address, array $overrides = []): O
         'shipping_amount' => 0,
         'grand_total' => 200,
         'shipping_address_id' => $address->id,
+    ], $overrides));
+}
+
+function createOrderItem(Order $order, Product $product, ?ProductVariant $variant = null, array $overrides = []): OrderItem
+{
+    return OrderItem::create(array_merge([
+        'order_id' => $order->id,
+        'vendor_id' => $product->vendor_id,
+        'product_id' => $product->id,
+        'product_variant_id' => $variant?->id,
+        'product_name' => $product->name,
+        'variant_info' => OrderItem::buildVariantInfo($variant),
+        'quantity' => 1,
+        'unit_price' => 150,
+        'total_price' => 150,
+        'item_status' => 'pending',
     ], $overrides));
 }
 
@@ -407,6 +425,36 @@ it('returns checkout defaults for the authenticated user', function () {
         ->assertJsonPath('data.payment_methods.0.value', 'cod');
 });
 
+it('adds items to the authenticated users cart and returns cart totals', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, ['business_name' => 'Cart Studio']);
+    $category = createCategory($admin, ['name' => 'Bags']);
+    $product = createProduct($vendor, $category, ['name' => 'Cart Bag']);
+    $variant = createVariant($product, [
+        'offer_price' => 120,
+        'stock_qty' => 4,
+    ]);
+    $user = createUser();
+
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson('/api/cart/items', [
+        'product_id' => $product->id,
+        'variant_id' => $variant->id,
+        'quantity' => 2,
+    ]);
+
+    $response
+        ->assertCreated()
+        ->assertJsonPath('data.items_count', 2)
+        ->assertJsonPath('data.items.0.product_name', 'Cart Bag')
+        ->assertJsonPath('data.items.0.quantity', 2)
+        ->assertJsonPath('data.totals.subtotal', 240);
+
+    expect(Cart::count())->toBe(1);
+    expect(CartItem::count())->toBe(1);
+});
+
 it('creates an order, payment, and decrements stock during checkout', function () {
     $admin = createAdmin();
     $vendor = createVendor($admin, ['business_name' => 'Checkout Studio']);
@@ -468,6 +516,74 @@ it('creates an order, payment, and decrements stock during checkout', function (
     expect($variant->fresh()->stock_qty)->toBe(3);
 });
 
+it('checks out the authenticated users cart and clears it after order creation', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, ['business_name' => 'Cart Checkout Studio', 'slug' => 'cart-checkout-studio']);
+    $category = createCategory($admin, ['name' => 'Shoes']);
+    $productA = createProduct($vendor, $category, ['name' => 'Cart Boot']);
+    $productB = createProduct($vendor, $category, ['name' => 'Cart Sneaker']);
+    $variantA = createVariant($productA, [
+        'size' => '42',
+        'offer_price' => 180,
+        'selling_price' => 220,
+        'actual_price' => 250,
+        'stock_qty' => 3,
+    ]);
+    $variantB = createVariant($productB, [
+        'size' => '43',
+        'offer_price' => 90,
+        'selling_price' => 120,
+        'actual_price' => 150,
+        'stock_qty' => 5,
+    ]);
+    $user = createUser([
+        'full_name' => 'Cart Buyer',
+        'phone' => '03009990000',
+    ]);
+
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/cart/items', [
+        'product_id' => $productA->id,
+        'variant_id' => $variantA->id,
+        'quantity' => 2,
+    ])->assertCreated();
+    $this->postJson('/api/cart/items', [
+        'product_id' => $productB->id,
+        'variant_id' => $variantB->id,
+        'quantity' => 1,
+    ])->assertCreated();
+
+    $response = $this->postJson('/api/checkout', [
+        'source' => 'cart',
+        'payment_method' => 'cod',
+        'save_as_default' => true,
+        'shipping_address' => [
+            'label' => 'Home',
+            'full_name' => 'Cart Buyer',
+            'phone' => '03009990000',
+            'address_line1' => '99 Cart Street',
+            'city' => 'Lahore',
+            'state' => 'Punjab',
+            'postal_code' => '54000',
+            'country' => 'Pakistan',
+        ],
+    ]);
+
+    $response
+        ->assertCreated()
+        ->assertJsonPath('data.items_count', 2)
+        ->assertJsonPath('data.items.0.product_name', 'Cart Boot')
+        ->assertJsonPath('data.items.1.product_name', 'Cart Sneaker')
+        ->assertJsonPath('data.grand_total', 450);
+
+    expect(Order::count())->toBe(1);
+    expect(OrderItem::count())->toBe(2);
+    expect(CartItem::count())->toBe(0);
+    expect($variantA->fresh()->stock_qty)->toBe(1);
+    expect($variantB->fresh()->stock_qty)->toBe(4);
+});
+
 it('rejects checkout when requested quantity exceeds stock', function () {
     $admin = createAdmin();
     $vendor = createVendor($admin, ['business_name' => 'Stock Studio']);
@@ -503,4 +619,123 @@ it('rejects checkout when requested quantity exceeds stock', function () {
     expect(Order::count())->toBe(0);
     expect(Payment::count())->toBe(0);
     expect($variant->fresh()->stock_qty)->toBe(1);
+});
+
+it('returns the authenticated users orders with nested item and vendor details', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, ['business_name' => 'Ordered Studio', 'slug' => 'ordered-studio']);
+    $category = createCategory($admin, ['name' => 'Coats']);
+    $product = createProduct($vendor, $category, ['name' => 'Ordered Coat']);
+    $variant = createVariant($product, [
+        'size' => 'M',
+        'color' => '#111111',
+        'offer_price' => 150,
+    ]);
+
+    ProductImage::create([
+        'product_id' => $product->id,
+        'image_url' => 'products/ordered-coat.jpg',
+        'is_primary' => true,
+        'sort_order' => 1,
+    ]);
+
+    $user = createUser(['full_name' => 'Orders User']);
+    $address = createAddress($user, ['city' => 'Lahore']);
+    $order = createOrder($user, $address, [
+        'order_number' => 'ORD-ORDERS-001',
+        'status' => 'confirmed',
+        'discount_amount' => 20,
+        'shipping_amount' => 10,
+        'grand_total' => 290,
+    ]);
+
+    createOrderItem($order, $product, $variant, [
+        'quantity' => 2,
+        'unit_price' => 140,
+        'total_price' => 280,
+        'item_status' => 'confirmed',
+    ]);
+
+    Payment::create([
+        'order_id' => $order->id,
+        'method' => 'cod',
+        'status' => 'pending',
+        'amount' => 290,
+    ]);
+
+    $otherUser = createUser();
+    $otherAddress = createAddress($otherUser);
+    $otherOrder = createOrder($otherUser, $otherAddress, [
+        'order_number' => 'ORD-OTHER-001',
+    ]);
+    createOrderItem($otherOrder, $product, $variant);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->getJson('/api/users/orders');
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.order_number', 'ORD-ORDERS-001')
+        ->assertJsonPath('data.0.items.0.product_name', 'Ordered Coat')
+        ->assertJsonPath('data.0.items.0.vendor.name', 'Ordered Studio')
+        ->assertJsonPath('data.0.items.0.vendor.link', '/vendors/ordered-studio')
+        ->assertJsonPath('data.0.items.0.quantity', 2)
+        ->assertJsonPath('data.0.items.0.total_price', 280)
+        ->assertJsonPath('data.0.shipping_address.full_address', '123 Archive Street, Lahore, 54000, Pakistan');
+});
+
+it('returns a public vendor profile with public posted products only', function () {
+    $admin = createAdmin();
+    $vendor = createVendor($admin, [
+        'business_name' => 'Profile Studio',
+        'slug' => 'profile-studio',
+        'description' => 'Architectural tailoring and archive outerwear.',
+        'logo' => 'vendors/profile-studio/logo.jpg',
+        'banner' => 'vendors/profile-studio/banner.jpg',
+    ]);
+    $category = createCategory($admin, ['name' => 'Outerwear']);
+
+    $visibleProduct = createProduct($vendor, $category, [
+        'name' => 'Profile Coat',
+        'is_featured' => true,
+    ]);
+    createVariant($visibleProduct, [
+        'offer_price' => 180,
+        'selling_price' => 220,
+        'actual_price' => 260,
+    ]);
+    ProductImage::create([
+        'product_id' => $visibleProduct->id,
+        'image_url' => 'products/profile-coat.jpg',
+        'is_primary' => true,
+        'sort_order' => 1,
+    ]);
+
+    $hiddenProduct = createProduct($vendor, $category, [
+        'name' => 'Hidden Draft',
+        'status' => 'draft',
+    ]);
+    createVariant($hiddenProduct);
+
+    $user = createUser();
+    $address = createAddress($user);
+    $order = createOrder($user, $address);
+    createOrderItem($order, $visibleProduct, $visibleProduct->variants()->first(), [
+        'item_status' => 'delivered',
+    ]);
+
+    $response = $this->getJson('/api/vendors/profile-studio');
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Profile Studio')
+        ->assertJsonPath('data.slug', 'profile-studio')
+        ->assertJsonPath('data.profile_link', '/vendors/profile-studio')
+        ->assertJsonPath('data.stats.products_count', 1)
+        ->assertJsonPath('data.stats.featured_products_count', 1)
+        ->assertJsonPath('data.stats.sold_items_count', 1)
+        ->assertJsonPath('data.products.0.name', 'Profile Coat')
+        ->assertJsonMissing(['name' => 'Hidden Draft']);
 });

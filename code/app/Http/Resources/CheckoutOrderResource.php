@@ -10,6 +10,30 @@ class CheckoutOrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         $item = $this->items->first();
+        $items = $this->items->map(function ($lineItem) {
+            return [
+                'id' => $lineItem->id,
+                'product_id' => $lineItem->product_id,
+                'variant_id' => $lineItem->product_variant_id,
+                'product_name' => $lineItem->product_name,
+                'brand' => $lineItem->vendor?->business_name,
+                'vendor' => $lineItem->vendor ? [
+                    'id' => $lineItem->vendor->id,
+                    'name' => $lineItem->vendor->business_name,
+                    'slug' => $lineItem->vendor->slug,
+                    'link' => '/vendors/' . ($lineItem->vendor->slug ?: $lineItem->vendor->id),
+                ] : null,
+                'variant_info' => $lineItem->variant_info,
+                'quantity' => (int) $lineItem->quantity,
+                'unit_price' => (float) $lineItem->unit_price,
+                'unit_price_formatted' => number_format((float) $lineItem->unit_price, 2, '.', ''),
+                'total_price' => (float) $lineItem->total_price,
+                'total_price_formatted' => number_format((float) $lineItem->total_price, 2, '.', ''),
+                'image' => $lineItem->product
+                    ? $this->resolveProductImage($lineItem->product)
+                    : null,
+            ];
+        })->values();
 
         return [
             'id' => $this->id,
@@ -28,6 +52,7 @@ class CheckoutOrderResource extends JsonResource
             'grand_total_formatted' => number_format((float) $this->grand_total, 2, '.', ''),
             'notes' => $this->notes,
             'created_at' => $this->created_at?->toIso8601String(),
+            'items_count' => $items->count(),
             'shipping_address' => $this->shippingAddress ? [
                 'id' => $this->shippingAddress->id,
                 'label' => $this->shippingAddress->label,
@@ -41,11 +66,18 @@ class CheckoutOrderResource extends JsonResource
                 'country' => $this->shippingAddress->country,
                 'full_address' => $this->shippingAddress->full_address,
             ] : null,
+            'items' => $items->all(),
             'item' => $item ? [
                 'product_id' => $item->product_id,
                 'variant_id' => $item->product_variant_id,
                 'product_name' => $item->product_name,
                 'brand' => $item->vendor?->business_name,
+                'vendor' => $item->vendor ? [
+                    'id' => $item->vendor->id,
+                    'name' => $item->vendor->business_name,
+                    'slug' => $item->vendor->slug,
+                    'link' => '/vendors/' . ($item->vendor->slug ?: $item->vendor->id),
+                ] : null,
                 'variant_info' => $item->variant_info,
                 'quantity' => (int) $item->quantity,
                 'unit_price' => (float) $item->unit_price,

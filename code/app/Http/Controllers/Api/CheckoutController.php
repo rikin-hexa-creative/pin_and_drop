@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CheckoutStoreRequest;
 use App\Http\Resources\CheckoutOrderResource;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -88,65 +90,16 @@ class CheckoutController extends Controller
         $user = $request->user();
 
         $order = DB::transaction(function () use ($validated, $user) {
-            $product = Product::query()
-                ->publicCatalog()
-                ->with([
-                    'vendor:id,business_name',
-                    'category:id,name,slug',
-                    'primaryImage:id,product_id,image_url,is_primary',
-                    'images:id,product_id,image_url,is_primary,sort_order',
-                ])
-                ->findOrFail($validated['product_id']);
-
-            $variant = ProductVariant::query()
-                ->where('product_id', $product->id)
-                ->whereKey($validated['variant_id'])
-                ->lockForUpdate()
-                ->first();
-
-            if (! $variant) {
-                throw ValidationException::withMessages([
-                    'variant_id' => 'The selected variant does not belong to this product.',
-                ]);
-            }
-
-            $requestedQuantity = (int) $validated['quantity'];
-
-            if (! $variant->isInStock()) {
-                throw ValidationException::withMessages([
-                    'quantity' => 'This variant is currently out of stock.',
-                ]);
-            }
-
-            if ($variant->stock_qty < $requestedQuantity) {
-                throw ValidationException::withMessages([
-                    'quantity' => "Only {$variant->stock_qty} item(s) are available for this variant.",
-                ]);
-            }
-
-            $unitPrice = (float) $variant->final_price;
-            $compareAtPrice = $this->resolveVariantCompareAtPrice($product, $variant, $unitPrice);
-            $subtotal = round($unitPrice * $requestedQuantity, 2);
-            $totalAmount = $compareAtPrice
-                ? round($compareAtPrice * $requestedQuantity, 2)
-                : $subtotal;
-            $discountAmount = round(max($totalAmount - $subtotal, 0), 2);
+            $checkoutSource = $validated['source'] ?? 'buy_now';
+            $lines = $checkoutSource === 'cart'
+                ? $this->buildCartCheckoutLines($user->id)
+                : [$this->buildBuyNowCheckoutLine($validated)];
+            $subtotal = round(collect($lines)->sum('subtotal'), 2);
+            $compareAtTotal = round(collect($lines)->sum('compare_at_total'), 2);
+            $discountAmount = round(max($compareAtTotal - $subtotal, 0), 2);
             $shippingAmount = 0.00;
             $grandTotal = round($subtotal + $shippingAmount, 2);
-
-            $address = UserAddress::create([
-                'user_id' => $user->id,
-                'label' => $validated['shipping_address']['label'] ?? 'Shipping',
-                'full_name' => $validated['shipping_address']['full_name'],
-                'phone' => $validated['shipping_address']['phone'],
-                'address_line1' => $validated['shipping_address']['address_line1'],
-                'address_line2' => $validated['shipping_address']['address_line2'] ?? null,
-                'city' => $validated['shipping_address']['city'],
-                'state' => $validated['shipping_address']['state'] ?? null,
-                'postal_code' => $validated['shipping_address']['postal_code'],
-                'country' => $validated['shipping_address']['country'],
-                'is_default' => false,
-            ]);
+            $address = $this->createShippingAddress($user->id, $validated);
 
             if (($validated['save_as_default'] ?? false) || ! $user->defaultAddress()->exists()) {
                 $address->makeDefault();
@@ -156,7 +109,7 @@ class CheckoutController extends Controller
                 'user_id' => $user->id,
                 'order_number' => Order::generateOrderNumber(),
                 'status' => 'pending',
-                'total_amount' => $totalAmount,
+                'total_amount' => $compareAtTotal ?: $subtotal,
                 'discount_amount' => $discountAmount,
                 'shipping_amount' => $shippingAmount,
                 'grand_total' => $grandTotal,
@@ -164,18 +117,22 @@ class CheckoutController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            OrderItem::create([
-                'order_id' => $order->id,
-                'vendor_id' => $product->vendor_id,
-                'product_id' => $product->id,
-                'product_variant_id' => $variant->id,
-                'product_name' => $product->name,
-                'variant_info' => OrderItem::buildVariantInfo($variant),
-                'quantity' => $requestedQuantity,
-                'unit_price' => $unitPrice,
-                'total_price' => $subtotal,
-                'item_status' => 'pending',
-            ]);
+            foreach ($lines as $line) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'vendor_id' => $line['product']->vendor_id,
+                    'product_id' => $line['product']->id,
+                    'product_variant_id' => $line['variant']->id,
+                    'product_name' => $line['product']->name,
+                    'variant_info' => OrderItem::buildVariantInfo($line['variant']),
+                    'quantity' => $line['quantity'],
+                    'unit_price' => $line['unit_price'],
+                    'total_price' => $line['subtotal'],
+                    'item_status' => 'pending',
+                ]);
+
+                $line['variant']->decrement('stock_qty', $line['quantity']);
+            }
 
             Payment::create([
                 'order_id' => $order->id,
@@ -187,22 +144,162 @@ class CheckoutController extends Controller
                 ],
             ]);
 
-            $variant->decrement('stock_qty', $requestedQuantity);
+            if ($checkoutSource === 'cart') {
+                Cart::firstOrCreate(['user_id' => $user->id])->clear();
+            }
 
-            return $order->load([
-                'shippingAddress',
-                'payment',
-                'items.vendor:id,business_name',
-                'items.product:id,name',
-                'items.product.primaryImage:id,product_id,image_url,is_primary',
-                'items.product.images:id,product_id,image_url,is_primary,sort_order',
-            ]);
+            return $this->loadOrder($order);
         });
 
         return response()->json([
             'message' => 'Checkout completed successfully.',
             'data' => CheckoutOrderResource::make($order),
         ], 201);
+    }
+
+    private function buildBuyNowCheckoutLine(array $validated): array
+    {
+        $product = Product::query()
+            ->publicCatalog()
+            ->with([
+                'vendor:id,business_name,slug',
+                'category:id,name,slug',
+                'primaryImage:id,product_id,image_url,is_primary',
+                'images:id,product_id,image_url,is_primary,sort_order',
+            ])
+            ->findOrFail($validated['product_id']);
+
+        $variant = ProductVariant::query()
+            ->where('product_id', $product->id)
+            ->whereKey($validated['variant_id'])
+            ->lockForUpdate()
+            ->first();
+
+        if (! $variant) {
+            throw ValidationException::withMessages([
+                'variant_id' => 'The selected variant does not belong to this product.',
+            ]);
+        }
+
+        $quantity = (int) $validated['quantity'];
+
+        if (! $variant->isInStock()) {
+            throw ValidationException::withMessages([
+                'quantity' => 'This variant is currently out of stock.',
+            ]);
+        }
+
+        if ($variant->stock_qty < $quantity) {
+            throw ValidationException::withMessages([
+                'quantity' => "Only {$variant->stock_qty} item(s) are available for this variant.",
+            ]);
+        }
+
+        return $this->buildCheckoutLine($product, $variant, $quantity);
+    }
+
+    private function buildCartCheckoutLines(int $userId): array
+    {
+        $cart = Cart::firstOrCreate(['user_id' => $userId]);
+        $cartItems = CartItem::query()
+            ->where('cart_id', $cart->id)
+            ->get();
+
+        if ($cartItems->isEmpty()) {
+            throw ValidationException::withMessages([
+                'source' => 'Your cart is empty.',
+            ]);
+        }
+
+        return $cartItems->map(function (CartItem $cartItem) {
+            $product = Product::query()
+                ->publicCatalog()
+                ->with([
+                    'vendor:id,business_name,slug',
+                    'category:id,name,slug',
+                    'primaryImage:id,product_id,image_url,is_primary',
+                    'images:id,product_id,image_url,is_primary,sort_order',
+                ])
+                ->find($cartItem->product_id);
+
+            if (! $product) {
+                throw ValidationException::withMessages([
+                    'source' => 'One or more cart items are no longer available.',
+                ]);
+            }
+
+            $variant = ProductVariant::query()
+                ->where('product_id', $product->id)
+                ->whereKey($cartItem->product_variant_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $variant) {
+                throw ValidationException::withMessages([
+                    'source' => 'One or more cart variants are no longer available.',
+                ]);
+            }
+
+            if (! $variant->isInStock()) {
+                throw ValidationException::withMessages([
+                    'source' => "The variant for {$product->name} is currently out of stock.",
+                ]);
+            }
+
+            if ($variant->stock_qty < $cartItem->quantity) {
+                throw ValidationException::withMessages([
+                    'source' => "Only {$variant->stock_qty} item(s) are available for {$product->name}.",
+                ]);
+            }
+
+            return $this->buildCheckoutLine($product, $variant, (int) $cartItem->quantity);
+        })->values()->all();
+    }
+
+    private function buildCheckoutLine(Product $product, ProductVariant $variant, int $quantity): array
+    {
+        $unitPrice = (float) $variant->final_price;
+        $compareAtPrice = $this->resolveVariantCompareAtPrice($product, $variant, $unitPrice);
+        $subtotal = round($unitPrice * $quantity, 2);
+
+        return [
+            'product' => $product,
+            'variant' => $variant,
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'compare_at_price' => $compareAtPrice,
+            'subtotal' => $subtotal,
+            'compare_at_total' => round(($compareAtPrice ?: $unitPrice) * $quantity, 2),
+        ];
+    }
+
+    private function createShippingAddress(int $userId, array $validated): UserAddress
+    {
+        return UserAddress::create([
+            'user_id' => $userId,
+            'label' => $validated['shipping_address']['label'] ?? 'Shipping',
+            'full_name' => $validated['shipping_address']['full_name'],
+            'phone' => $validated['shipping_address']['phone'],
+            'address_line1' => $validated['shipping_address']['address_line1'],
+            'address_line2' => $validated['shipping_address']['address_line2'] ?? null,
+            'city' => $validated['shipping_address']['city'],
+            'state' => $validated['shipping_address']['state'] ?? null,
+            'postal_code' => $validated['shipping_address']['postal_code'],
+            'country' => $validated['shipping_address']['country'],
+            'is_default' => false,
+        ]);
+    }
+
+    private function loadOrder(Order $order): Order
+    {
+        return $order->load([
+            'shippingAddress',
+            'payment',
+            'items.vendor:id,business_name,slug',
+            'items.product:id,name,slug',
+            'items.product.primaryImage:id,product_id,image_url,is_primary',
+            'items.product.images:id,product_id,image_url,is_primary,sort_order',
+        ]);
     }
 
     private function resolveVariantCompareAtPrice(Product $product, ProductVariant $variant, float $unitPrice): ?float

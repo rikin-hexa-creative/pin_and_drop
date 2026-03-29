@@ -7,6 +7,13 @@ use Illuminate\Validation\Rule;
 
 class CheckoutStoreRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'source' => $this->input('source', 'buy_now'),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -15,9 +22,10 @@ class CheckoutStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', 'exists:products,id'],
-            'variant_id' => ['required', 'integer', 'exists:product_variants,id'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:25'],
+            'source' => ['required', Rule::in(['buy_now', 'cart'])],
+            'product_id' => ['required_if:source,buy_now', 'nullable', 'integer', 'exists:products,id'],
+            'variant_id' => ['required_if:source,buy_now', 'nullable', 'integer', 'exists:product_variants,id'],
+            'quantity' => ['required_if:source,buy_now', 'nullable', 'integer', 'min:1', 'max:25'],
             'payment_method' => [
                 'required',
                 Rule::in(['cod', 'stripe', 'paypal', 'bank_transfer', 'jazzcash', 'easypaisa']),
@@ -41,6 +49,7 @@ class CheckoutStoreRequest extends FormRequest
     {
         return [
             'variant_id.required' => 'Select a product size or color before checkout.',
+            'product_id.required_if' => 'Select a product before checkout.',
         ];
     }
 }

@@ -29,6 +29,7 @@ const useCheckout = () => {
         mutationFn: checkout,
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["checkout-context"] });
+            queryClient.invalidateQueries({ queryKey: ["cart"] });
 
             if (variables?.product_id) {
                 queryClient.invalidateQueries({

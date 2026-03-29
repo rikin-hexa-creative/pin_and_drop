@@ -1,8 +1,8 @@
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useAddCartItem } from "../../../apis/cart.api";
 import { useProductById } from "../../../apis/product.api";
-import { useCart } from "../../../context/CartWrapper";
 import PinModal from "../../../components/site/PinModal";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -20,7 +20,7 @@ const navItems = [
 const mobileNavItems = [
     { label: "Explore", icon: "grid_view", to: "/shop" },
     { label: "Saved", icon: "bookmark", to: "/user-profile" },
-    { label: "Cart", icon: "shopping_cart", to: "/sign-in" },
+    { label: "Cart", icon: "shopping_cart", to: "/cart" },
     { label: "Profile", icon: "person", to: "/user-profile", active: true },
 ];
 
@@ -93,7 +93,7 @@ const ProductPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { data: product, error, isLoading } = useProductById(id);
-    const { addToCart } = useCart();
+    const addCartItemMutation = useAddCartItem();
     const [selectedVariantId, setSelectedVariantId] = useState(null);
     const [selectedImageId, setSelectedImageId] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -226,13 +226,31 @@ const ProductPage = () => {
         );
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!product?.id || !selectedVariant?.id || !selectedVariant?.in_stock) {
             return;
         }
-        addToCart(product, selectedVariant, quantity);
-        setIsAddedToCart(true);
-        setTimeout(() => setIsAddedToCart(false), 2000);
+
+        if (!Cookies.get("user_token")) {
+            navigate("/sign-in", {
+                state: {
+                    redirectTo: window.location.pathname,
+                },
+            });
+            return;
+        }
+
+        try {
+            await addCartItemMutation.mutateAsync({
+                product_id: product.id,
+                variant_id: selectedVariant.id,
+                quantity,
+            });
+            setIsAddedToCart(true);
+            setTimeout(() => setIsAddedToCart(false), 2000);
+        } catch {
+            setIsAddedToCart(false);
+        }
     };
 
     const handleBuyNow = () => {
@@ -531,11 +549,18 @@ const ProductPage = () => {
                                 <button
                                     type="button"
                                     onClick={handleAddToCart}
-                                    disabled={!selectedVariant?.in_stock}
+                                    disabled={
+                                        !selectedVariant?.in_stock ||
+                                        addCartItemMutation.isPending
+                                    }
                                     className="flex-1 bg-black py-4 font-['Inter'] text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-black/35"
                                 >
                                     {selectedVariant?.in_stock
-                                        ? isAddedToCart ? "Added To Cart" : "Add To Cart"
+                                        ? addCartItemMutation.isPending
+                                            ? "Adding..."
+                                            : isAddedToCart
+                                              ? "Added To Cart"
+                                              : "Add To Cart"
                                         : "Out Of Stock"}
                                 </button>
 

@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser } from "../../context/UserContext";
-import { useVendorMenu } from "../../apis/vendor.api";
 import { useCategoryMenu } from "../../apis/categories.api";
+import { useVendorMenu } from "../../apis/vendor.api";
+import { useUser } from "../../context/UserContext";
 
 const APP_ROUTES = new Set(["/", "/shop"]);
 
@@ -409,7 +409,7 @@ const profileMenu = {
         // { label: "FAVORITES", to: "/favorites" },
         { label: "PIN", to: "/pin" },
         { label: "CART", to: "/cart" },
-        { label: "ORDERS", to: "/orders" },
+        { label: "ORDERS", to: "/ordered" },
     ],
     selling: {
         heading: { label: "SELLING", to: "/sell/for-sale" },
@@ -642,8 +642,9 @@ const Header = () => {
 
     const vendorsMenu = vendorsMenuData || fallbackVendorsMenu;
     const menswearMenu = categoriesMenuData?.menswear || fallbackMenswearMenu;
-    const womenswearMenu = categoriesMenuData?.womenswear || fallbackWomenswearMenu;
-    
+    const womenswearMenu =
+        categoriesMenuData?.womenswear || fallbackWomenswearMenu;
+
     const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
 
     const [activeMenu, setActiveMenu] = useState(null);
