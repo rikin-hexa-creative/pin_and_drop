@@ -399,7 +399,7 @@ const fallbackWomenswearMenu = {
 const merchandisingLinks = [{ label: "COLLECTIONS", to: "/collections" }];
 
 const quickActions = [
-    { label: "SELL", to: "/sell", bordered: true },
+    { label: "SELL", to: "/sell/add", bordered: true },
     { label: "MY FEED", to: "/my-feed" },
 ];
 

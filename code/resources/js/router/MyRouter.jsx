@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Navigate, createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignInPage from "../panel/auth/SignInPage";
 import SignUpPage from "../panel/auth/SignUpPage";
 import Layout from "../panel/guest/layout/Layout";
@@ -10,6 +10,7 @@ import PinDetailPage from "../panel/guest/pages/PinDetailPage";
 import PinPage from "../panel/guest/pages/PinPage";
 import ProductPage from "../panel/guest/pages/ProductPage";
 import ShopPage from "../panel/guest/pages/ShopPage";
+import AddForSalePage from "../panel/user/AddForSalePage";
 import ForSalePage from "../panel/user/ForSalePage";
 import UserProfilePage from "../panel/user/UserProfilePage";
 import VendorProfilePage from "../panel/vendor/VendorProfilePage";
@@ -79,6 +80,18 @@ const MyRouter = () => {
                 {
                     path: "/sell/for-sale",
                     element: <ForSalePage />,
+                },
+                {
+                    path: "/sell/sold",
+                    element: <ForSalePage />,
+                },
+                {
+                    path: "/sell",
+                    element: <Navigate to="/sell/for-sale" replace />,
+                },
+                {
+                    path: "/sell/add",
+                    element: <AddForSalePage />,
                 },
             ],
         },

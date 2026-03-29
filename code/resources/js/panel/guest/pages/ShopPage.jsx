@@ -9,12 +9,7 @@ import { Link } from "react-router-dom";
 import { useCategories } from "../../../apis/categories.api";
 import { useProductFilters, useProducts } from "../../../apis/product.api";
 import ProductCard from "../../../components/product/ProductCard";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-});
+import { formatCurrency } from "../../../utils/currency";
 
 const navItems = [
     { label: "Shop", to: "/my-feed", active: true },
@@ -46,15 +41,27 @@ const parsePriceValue = (value) => {
 
 const buildPriceLabel = (minPrice, maxPrice) => {
     if (minPrice !== undefined && maxPrice !== undefined) {
-        return `${currencyFormatter.format(minPrice)} - ${currencyFormatter.format(maxPrice)}`;
+        return `${formatCurrency(minPrice, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        })} - ${formatCurrency(maxPrice, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        })}`;
     }
 
     if (minPrice !== undefined) {
-        return `${currencyFormatter.format(minPrice)}+`;
+        return `${formatCurrency(minPrice, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        })}+`;
     }
 
     if (maxPrice !== undefined) {
-        return `Up to ${currencyFormatter.format(maxPrice)}`;
+        return `Up to ${formatCurrency(maxPrice, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        })}`;
     }
 
     return "";
@@ -267,8 +274,16 @@ const FiltersPanel = ({
 
             {priceBounds.max > 0 ? (
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
-                    Available: {currencyFormatter.format(priceBounds.min)} to{" "}
-                    {currencyFormatter.format(priceBounds.max)}
+                    Available:{" "}
+                    {formatCurrency(priceBounds.min, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    })}{" "}
+                    to{" "}
+                    {formatCurrency(priceBounds.max, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    })}
                 </p>
             ) : null}
         </FilterSection>

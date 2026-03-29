@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { formatCurrency } from "../../utils/currency";
 
 const ProductCard = ({
     variant = "home",
@@ -46,7 +47,7 @@ const ProductCard = ({
                             Size: {size}
                         </p>
                         <p className="text-sm font-bold font-['Inter']">
-                            {price}
+                            {formatCurrency(price)}
                         </p>
                     </div>
                 </div>
@@ -89,7 +90,7 @@ const ProductCard = ({
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-base font-semibold text-black">
-                        {price}
+                        {formatCurrency(price)}
                     </span>
                     {badge && (
                         <span className="rounded-full border border-black/10 bg-[#f6f3ef] px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/60">

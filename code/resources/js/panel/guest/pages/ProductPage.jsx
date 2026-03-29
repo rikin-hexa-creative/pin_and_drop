@@ -4,11 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAddCartItem } from "../../../apis/cart.api";
 import { useProductById } from "../../../apis/product.api";
 import PinModal from "../../../components/site/PinModal";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-});
+import { formatCurrency } from "../../../utils/currency";
 
 const navItems = [
     { label: "Collections", to: "/" },
@@ -25,11 +21,6 @@ const mobileNavItems = [
 ];
 
 const starIndexes = [1, 2, 3, 4, 5];
-
-const formatCurrency = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? currencyFormatter.format(amount) : "$0.00";
-};
 
 const selectVariant = (variants, color, size) => {
     if (!variants?.length) {

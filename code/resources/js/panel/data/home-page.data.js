@@ -255,7 +255,7 @@ export const homepageModules = [
         kind: "preview",
         href: "/collections/hats-under-100",
         tag: "From Grailed",
-        title: "Hats Under $100",
+        title: "Hats Under NRS 100",
         images: hatsPreviewImages,
     },
     {
@@ -303,7 +303,7 @@ export const homepageModules = [
         kind: "preview",
         href: "/collections/new-with-tags-luxury-under-300",
         tag: "From Grailed",
-        title: "New With Tags Luxury Under $300",
+        title: "New With Tags Luxury Under NRS 300",
         images: newLuxuryPreviewImages,
     },
 ];

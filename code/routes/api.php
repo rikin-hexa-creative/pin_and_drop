@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductFilterController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\UserCollectionController;
+use App\Http\Controllers\Api\UserSaleController;
 use App\Http\Controllers\Api\VendorController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user/collections/{id}', [UserCollectionController::class, 'destroy']);
     Route::post('/user/collections/{id}/pin', [UserCollectionController::class, 'pinProduct']);
     Route::post('/user/collections/{id}/unpin', [UserCollectionController::class, 'unpinProduct']);
+    Route::get('/user/sales', [UserSaleController::class, 'index']);
+    Route::post('/user/sales', [UserSaleController::class, 'store']);
 });
 
 Route::get('/menus/vendors', [MenuController::class, 'vendors']);

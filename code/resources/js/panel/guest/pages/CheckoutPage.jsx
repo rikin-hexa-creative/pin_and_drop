@@ -4,16 +4,7 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useCartQuery } from "../../../apis/cart.api";
 import { useCheckout, useCheckoutContext } from "../../../apis/checkout.api";
 import { useProductById } from "../../../apis/product.api";
-
-const money = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-});
-
-const formatCurrency = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? money.format(amount) : "$0.00";
-};
+import { formatCurrency } from "../../../utils/currency";
 
 const baseForm = {
     label: "Shipping",

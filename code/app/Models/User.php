@@ -82,6 +82,11 @@ class User extends Authenticatable
         return $this->hasMany(UserCollection::class);
     }
 
+    public function sales(): HasMany
+    {
+        return $this->hasMany(UserSale::class);
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------

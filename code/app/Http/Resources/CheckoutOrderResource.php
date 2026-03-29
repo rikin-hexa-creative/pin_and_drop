@@ -41,7 +41,7 @@ class CheckoutOrderResource extends JsonResource
             'status' => $this->status,
             'payment_status' => $this->payment?->status,
             'payment_method' => $this->payment?->method,
-            'currency' => 'USD',
+            'currency' => 'NRS',
             'total_amount' => (float) $this->total_amount,
             'total_amount_formatted' => number_format((float) $this->total_amount, 2, '.', ''),
             'discount_amount' => (float) $this->discount_amount,

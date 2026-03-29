@@ -5,16 +5,7 @@ import {
     useRemoveCartItem,
     useUpdateCartItem,
 } from "../../../apis/cart.api";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-});
-
-const formatCurrency = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? currencyFormatter.format(amount) : "$0.00";
-};
+import { formatCurrency } from "../../../utils/currency";
 
 const CartPage = () => {
     const navigate = useNavigate();

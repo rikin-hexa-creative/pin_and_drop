@@ -2,16 +2,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUserOrders } from "../../../apis/order.api";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-});
-
-const formatCurrency = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? currencyFormatter.format(amount) : "$0.00";
-};
+import { formatCurrency } from "../../../utils/currency";
 
 const statusClassNames = {
     pending: "bg-[#fef3c7] text-[#92400e]",

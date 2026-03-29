@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useGetCollection, useUnpinProduct } from "../../../apis/collection.api";
 import ProductCard from "../../../components/product/ProductCard";
+import { formatCurrency } from "../../../utils/currency";
 
 const PinDetailPage = () => {
     const { id } = useParams();
@@ -70,7 +71,11 @@ const PinDetailPage = () => {
                                             <p className="font-['Inter'] text-[11px] font-black text-white uppercase tracking-widest truncate">{product.name}</p>
                                             <div className="flex justify-between items-center mt-1">
                                                 <p className="font-['Space_Grotesk'] text-[10px] text-white/70 uppercase">
-                                                    {product.base_price > 0 ? `$${product.base_price}` : "Price TBD"}
+                                                    {product.base_price > 0
+                                                        ? formatCurrency(
+                                                              product.base_price
+                                                          )
+                                                        : "Price TBD"}
                                                 </p>
                                                 <span className="text-[10px] text-white/50 font-bold uppercase tracking-tighter">View Detail</span>
                                             </div>
