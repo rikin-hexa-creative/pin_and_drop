@@ -178,6 +178,16 @@ const CheckoutPage = () => {
         source === "cart"
             ? Number(cart?.totals?.grand_total ?? subtotal)
             : subtotal + shipping;
+    const backLink =
+        source === "cart"
+            ? "/cart"
+            : source === "user_sale"
+            ? sale?.id || saleId
+                ? `/sell/product/${sale?.id ?? saleId}`
+                : "/sell"
+            : product?.id || productId
+            ? `/product/${product?.id ?? productId}`
+            : "/shop";
     const isSubmitDisabled =
         checkoutMutation.isPending ||
         (source === "cart"
@@ -414,13 +424,7 @@ const CheckoutPage = () => {
                         </h1>
                     </div>
                     <Link
-                        to={
-                            source === "cart"
-                                ? "/cart"
-                                : source === "user_sale"
-                                ? `/sell/product/${sale.id}`
-                                : `/product/${product.id}`
-                        }
+                        to={backLink}
                         className="inline-flex w-fit rounded-full border border-black/12 bg-white px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-black"
                     >
                         {source === "cart"
