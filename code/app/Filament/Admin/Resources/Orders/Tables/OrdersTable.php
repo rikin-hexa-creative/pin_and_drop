@@ -2,11 +2,10 @@
 
 namespace App\Filament\Admin\Resources\Orders\Tables;
 
-use Filament\Tables;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Actions\EditAction;
 
 class OrdersTable
 {
@@ -22,12 +21,16 @@ class OrdersTable
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('items_count')
+                    ->label('Items')
+                    ->counts('items')
+                    ->sortable(),
                 TextColumn::make('status')
                     ->badge()
                     ->sortable(),
                 TextColumn::make('grand_total')
                     ->label('Total')
-                    ->formatStateUsing(fn ($state) => '$' . number_format((float) $state, 2))
+                    ->formatStateUsing(fn ($state) => 'NRS ' . number_format((float) $state, 2))
                     ->sortable(),
                 TextColumn::make('payment.status')
                     ->label('Payment')

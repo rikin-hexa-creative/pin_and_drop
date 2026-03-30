@@ -9,9 +9,13 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'order_id',
+        'item_source',
         'vendor_id',
         'product_id',
         'product_variant_id',
+        'user_sale_id',
+        'sale_seller_user_id',
+        'seller_name',
         'product_name',
         'variant_info',
         'quantity',
@@ -53,6 +57,16 @@ class OrderItem extends Model
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
+    public function userSale(): BelongsTo
+    {
+        return $this->belongsTo(UserSale::class);
+    }
+
+    public function saleSeller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sale_seller_user_id');
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------
@@ -86,6 +100,16 @@ class OrderItem extends Model
         $parts = array_filter([
             $variant->size  ? "Size: {$variant->size}"   : null,
             $variant->color ? "Color: {$variant->color}" : null,
+        ]);
+
+        return implode(' | ', $parts) ?: null;
+    }
+
+    public static function buildUserSaleInfo(UserSale $sale): ?string
+    {
+        $parts = array_filter([
+            $sale->condition ? "Condition: {$sale->condition}" : null,
+            $sale->created_date ? 'Listed: ' . $sale->created_date->format('M d, Y') : null,
         ]);
 
         return implode(' | ', $parts) ?: null;

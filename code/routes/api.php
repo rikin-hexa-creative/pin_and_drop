@@ -43,6 +43,8 @@ Route::get('/menus/vendors', [MenuController::class, 'vendors']);
 Route::get('/menus/categories', [MenuController::class, 'categories']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/sell', [UserSaleController::class, 'catalogIndex']);
+Route::get('/sell/{id}', [UserSaleController::class, 'showPublic'])->whereNumber('id');
 Route::get('/vendors', [VendorController::class, 'index']);
 Route::get('/vendors/{identifier}', [VendorController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);

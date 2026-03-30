@@ -8,11 +8,126 @@ use App\Http\Resources\UserSaleResource;
 use App\Models\UserSale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class UserSaleController extends Controller
 {
+    public function catalogIndex(Request $request): JsonResponse
+    {
+        $validated = Validator::make($request->all(), [
+            'search' => ['nullable', 'string', 'max:255'],
+            'condition' => ['nullable', 'array'],
+            'condition.*' => ['string', 'max:100'],
+            'sort' => ['nullable', Rule::in(['latest', 'oldest', 'price_asc', 'price_desc'])],
+            'min_price' => ['nullable', 'numeric', 'min:0'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:24'],
+        ])->validate();
+
+        $baseQuery = UserSale::query()
+            ->with('user:id,full_name,avatar')
+            ->active()
+            ->notSold();
+
+        $query = clone $baseQuery;
+        $conditions = Arr::wrap($validated['condition'] ?? []);
+        $search = trim((string) ($validated['search'] ?? ''));
+        $minPrice = isset($validated['min_price'])
+            ? (float) $validated['min_price']
+            : null;
+        $maxPrice = isset($validated['max_price'])
+            ? (float) $validated['max_price']
+            : null;
+        $sort = $validated['sort'] ?? 'latest';
+        $perPage = (int) ($validated['per_page'] ?? 12);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search): void {
+                $builder
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('condition', 'like', "%{$search}%");
+            });
+        }
+
+        if (! empty($conditions)) {
+            $query->whereIn('condition', $conditions);
+        }
+
+        if ($minPrice !== null) {
+            $query->where('actual_price', '>=', $minPrice);
+        }
+
+        if ($maxPrice !== null) {
+            $query->where('actual_price', '<=', $maxPrice);
+        }
+
+        match ($sort) {
+            'oldest' => $query->orderBy('created_date')->orderBy('id'),
+            'price_asc' => $query->orderBy('actual_price')->orderByDesc('id'),
+            'price_desc' => $query->orderByDesc('actual_price')->orderByDesc('id'),
+            default => $query->orderByDesc('created_date')->orderByDesc('id'),
+        };
+
+        $sales = $query->paginate($perPage)->withQueryString();
+        $conditionOptions = (clone $baseQuery)
+            ->select('condition', DB::raw('COUNT(*) as listings_count'))
+            ->groupBy('condition')
+            ->orderBy('condition')
+            ->get()
+            ->map(fn ($sale) => [
+                'value' => $sale->condition,
+                'label' => $sale->condition,
+                'listings_count' => (int) $sale->listings_count,
+            ])
+            ->values()
+            ->all();
+        $priceRange = [
+            'min' => (float) ((clone $baseQuery)->min('actual_price') ?? 0),
+            'max' => (float) ((clone $baseQuery)->max('actual_price') ?? 0),
+        ];
+
+        return response()->json([
+            'data' => UserSaleResource::collection($sales->getCollection()),
+            'meta' => [
+                'current_page' => $sales->currentPage(),
+                'last_page' => $sales->lastPage(),
+                'per_page' => $sales->perPage(),
+                'total' => $sales->total(),
+                'from' => $sales->firstItem(),
+                'to' => $sales->lastItem(),
+                'next_page' => $sales->hasMorePages()
+                    ? $sales->currentPage() + 1
+                    : null,
+                'filters' => [
+                    'search' => $search,
+                    'conditions' => $conditionOptions,
+                    'sort' => $sort,
+                    'price_range' => $priceRange,
+                    'applied_conditions' => $conditions,
+                    'min_price' => $minPrice,
+                    'max_price' => $maxPrice,
+                ],
+            ],
+        ]);
+    }
+
+    public function showPublic(int $id): JsonResponse
+    {
+        $sale = UserSale::query()
+            ->with('user:id,full_name,avatar')
+            ->active()
+            ->notSold()
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => UserSaleResource::make($sale),
+        ]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $validated = Validator::make($request->all(), [

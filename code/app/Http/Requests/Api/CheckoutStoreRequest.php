@@ -22,9 +22,10 @@ class CheckoutStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'source' => ['required', Rule::in(['buy_now', 'cart'])],
+            'source' => ['required', Rule::in(['buy_now', 'cart', 'user_sale'])],
             'product_id' => ['required_if:source,buy_now', 'nullable', 'integer', 'exists:products,id'],
             'variant_id' => ['required_if:source,buy_now', 'nullable', 'integer', 'exists:product_variants,id'],
+            'user_sale_id' => ['required_if:source,user_sale', 'nullable', 'integer', 'exists:user_sales,id'],
             'quantity' => ['required_if:source,buy_now', 'nullable', 'integer', 'min:1', 'max:25'],
             'payment_method' => [
                 'required',
@@ -50,6 +51,7 @@ class CheckoutStoreRequest extends FormRequest
         return [
             'variant_id.required' => 'Select a product size or color before checkout.',
             'product_id.required_if' => 'Select a product before checkout.',
+            'user_sale_id.required_if' => 'Select a sell listing before checkout.',
         ];
     }
 }

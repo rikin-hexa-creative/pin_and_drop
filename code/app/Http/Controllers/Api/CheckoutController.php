@@ -12,6 +12,7 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\UserSale;
 use App\Models\UserAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,9 +92,11 @@ class CheckoutController extends Controller
 
         $order = DB::transaction(function () use ($validated, $user) {
             $checkoutSource = $validated['source'] ?? 'buy_now';
-            $lines = $checkoutSource === 'cart'
-                ? $this->buildCartCheckoutLines($user->id)
-                : [$this->buildBuyNowCheckoutLine($validated)];
+            $lines = match ($checkoutSource) {
+                'cart' => $this->buildCartCheckoutLines($user->id),
+                'user_sale' => [$this->buildUserSaleCheckoutLine($validated, $user->id)],
+                default => [$this->buildBuyNowCheckoutLine($validated)],
+            };
             $subtotal = round(collect($lines)->sum('subtotal'), 2);
             $compareAtTotal = round(collect($lines)->sum('compare_at_total'), 2);
             $discountAmount = round(max($compareAtTotal - $subtotal, 0), 2);
@@ -118,20 +121,8 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($lines as $line) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'vendor_id' => $line['product']->vendor_id,
-                    'product_id' => $line['product']->id,
-                    'product_variant_id' => $line['variant']->id,
-                    'product_name' => $line['product']->name,
-                    'variant_info' => OrderItem::buildVariantInfo($line['variant']),
-                    'quantity' => $line['quantity'],
-                    'unit_price' => $line['unit_price'],
-                    'total_price' => $line['subtotal'],
-                    'item_status' => 'pending',
-                ]);
-
-                $line['variant']->decrement('stock_qty', $line['quantity']);
+                $this->createOrderItemFromLine($order, $line);
+                $this->finalizeCheckoutLine($line);
             }
 
             Payment::create([
@@ -196,6 +187,42 @@ class CheckoutController extends Controller
         }
 
         return $this->buildCheckoutLine($product, $variant, $quantity);
+    }
+
+    private function buildUserSaleCheckoutLine(array $validated, int $buyerId): array
+    {
+        $sale = UserSale::query()
+            ->with('user:id,full_name,avatar')
+            ->lockForUpdate()
+            ->find($validated['user_sale_id']);
+
+        if (! $sale || $sale->status !== 'active' || $sale->sale_status !== 'not_sold') {
+            throw ValidationException::withMessages([
+                'user_sale_id' => 'This sell listing is no longer available.',
+            ]);
+        }
+
+        if ((int) $sale->user_id === $buyerId) {
+            throw ValidationException::withMessages([
+                'user_sale_id' => 'You cannot buy your own sell listing.',
+            ]);
+        }
+
+        $unitPrice = (float) $sale->actual_price;
+        $compareAtPrice = $sale->compare_at_price !== null && (float) $sale->compare_at_price > $unitPrice
+            ? (float) $sale->compare_at_price
+            : null;
+
+        return [
+            'source' => 'user_sale',
+            'sale' => $sale,
+            'seller' => $sale->user,
+            'quantity' => 1,
+            'unit_price' => $unitPrice,
+            'compare_at_price' => $compareAtPrice,
+            'subtotal' => round($unitPrice, 2),
+            'compare_at_total' => round($compareAtPrice ?: $unitPrice, 2),
+        ];
     }
 
     private function buildCartCheckoutLines(int $userId): array
@@ -263,6 +290,7 @@ class CheckoutController extends Controller
         $subtotal = round($unitPrice * $quantity, 2);
 
         return [
+            'source' => 'product',
             'product' => $product,
             'variant' => $variant,
             'quantity' => $quantity,
@@ -271,6 +299,61 @@ class CheckoutController extends Controller
             'subtotal' => $subtotal,
             'compare_at_total' => round(($compareAtPrice ?: $unitPrice) * $quantity, 2),
         ];
+    }
+
+    private function createOrderItemFromLine(Order $order, array $line): void
+    {
+        if (($line['source'] ?? 'product') === 'user_sale') {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'item_source' => 'user_sale',
+                'vendor_id' => null,
+                'product_id' => null,
+                'product_variant_id' => null,
+                'user_sale_id' => $line['sale']->id,
+                'sale_seller_user_id' => $line['seller']?->id,
+                'seller_name' => $line['seller']?->full_name ?? $line['sale']->user?->full_name,
+                'product_name' => $line['sale']->name,
+                'variant_info' => OrderItem::buildUserSaleInfo($line['sale']),
+                'quantity' => $line['quantity'],
+                'unit_price' => $line['unit_price'],
+                'total_price' => $line['subtotal'],
+                'item_status' => 'pending',
+            ]);
+
+            return;
+        }
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'item_source' => 'product',
+            'vendor_id' => $line['product']->vendor_id,
+            'product_id' => $line['product']->id,
+            'product_variant_id' => $line['variant']->id,
+            'user_sale_id' => null,
+            'sale_seller_user_id' => null,
+            'seller_name' => null,
+            'product_name' => $line['product']->name,
+            'variant_info' => OrderItem::buildVariantInfo($line['variant']),
+            'quantity' => $line['quantity'],
+            'unit_price' => $line['unit_price'],
+            'total_price' => $line['subtotal'],
+            'item_status' => 'pending',
+        ]);
+    }
+
+    private function finalizeCheckoutLine(array $line): void
+    {
+        if (($line['source'] ?? 'product') === 'user_sale') {
+            $line['sale']->update([
+                'sale_status' => 'sold',
+                'status' => 'inactive',
+            ]);
+
+            return;
+        }
+
+        $line['variant']->decrement('stock_qty', $line['quantity']);
     }
 
     private function createShippingAddress(int $userId, array $validated): UserAddress
@@ -299,6 +382,8 @@ class CheckoutController extends Controller
             'items.product:id,name,slug',
             'items.product.primaryImage:id,product_id,image_url,is_primary',
             'items.product.images:id,product_id,image_url,is_primary,sort_order',
+            'items.userSale:id,user_id,name,images,actual_price,compare_at_price,condition,created_date,sale_status,status',
+            'items.saleSeller:id,full_name,avatar',
         ]);
     }
 

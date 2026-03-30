@@ -21,6 +21,8 @@ class OrderController extends Controller
                 'items.product:id,name,slug',
                 'items.product.primaryImage:id,product_id,image_url,is_primary',
                 'items.product.images:id,product_id,image_url,is_primary,sort_order',
+                'items.userSale:id,user_id,name,images,actual_price,compare_at_price,condition,created_date,sale_status,status',
+                'items.saleSeller:id,full_name,avatar',
             ])
             ->latest()
             ->get();

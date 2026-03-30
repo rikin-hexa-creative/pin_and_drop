@@ -196,7 +196,7 @@ const AddForSalePage = () => {
     return (
         <div className="min-h-screen bg-[linear-gradient(180deg,#fbf7f1_0%,#f1e8de_100%)]">
             <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-                <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+                <div className="grid gap-8">
                     <section className="overflow-hidden rounded-[32px] border border-black/8 bg-[#111111] text-white shadow-[0_28px_90px_rgba(0,0,0,0.14)]">
                         <div className="p-6 sm:p-8">
                             <p className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-[0.28em] text-white/50">
@@ -483,7 +483,10 @@ const AddForSalePage = () => {
                                         />
                                         {fieldErrors.compare_at_price ? (
                                             <p className="text-[11px] font-semibold text-[#b91c1c]">
-                                                {fieldErrors.compare_at_price[0]}
+                                                {
+                                                    fieldErrors
+                                                        .compare_at_price[0]
+                                                }
                                             </p>
                                         ) : null}
                                     </label>

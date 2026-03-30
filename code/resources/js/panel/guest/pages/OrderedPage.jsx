@@ -65,7 +65,10 @@ const OrderedPage = () => {
                 <div className="mx-auto max-w-6xl animate-pulse space-y-6">
                     <div className="h-12 w-72 bg-black/5" />
                     {Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index} className="h-40 rounded-[28px] bg-white" />
+                        <div
+                            key={index}
+                            className="h-40 rounded-[28px] bg-white"
+                        />
                     ))}
                 </div>
             </div>
@@ -84,7 +87,7 @@ const OrderedPage = () => {
                     </h1>
                     <p className="mt-4 text-sm leading-6 text-black/60">
                         When you place an order, the product details, pricing,
-                        quantity, and vendor links will appear here.
+                        quantity, and seller details will appear here.
                     </p>
                     <Link
                         to="/shop"
@@ -110,8 +113,8 @@ const OrderedPage = () => {
                         </h1>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-black/60">
                             Expand any order to view the product, quantity,
-                            unit price, total, shipping snapshot, and the vendor
-                            profile link.
+                            unit price, total, shipping snapshot, and the
+                            seller or vendor details.
                         </p>
                     </div>
                     <Link
@@ -165,7 +168,7 @@ const OrderedPage = () => {
                                                 </span>
                                             </div>
                                             <p className="mt-2 text-sm text-black/55">
-                                                Ordered {order.created_at} •{" "}
+                                                Ordered {order.created_at} -{" "}
                                                 {order.items_count} item
                                                 {order.items_count === 1
                                                     ? ""
@@ -175,7 +178,7 @@ const OrderedPage = () => {
                                                 <p className="mt-3 text-sm leading-6 text-black/65">
                                                     {firstItem.product_name}
                                                     {firstItem.variant_info
-                                                        ? ` • ${firstItem.variant_info}`
+                                                        ? ` - ${firstItem.variant_info}`
                                                         : ""}
                                                 </p>
                                             ) : null}
@@ -218,13 +221,17 @@ const OrderedPage = () => {
                                                     <div className="flex justify-between gap-4">
                                                         <span>Payment</span>
                                                         <span className="font-semibold uppercase text-black">
-                                                            {order.payment_method}
+                                                            {
+                                                                order.payment_method
+                                                            }
                                                         </span>
                                                     </div>
                                                     <div className="flex justify-between gap-4">
                                                         <span>Payment Status</span>
                                                         <span className="font-semibold uppercase text-black">
-                                                            {order.payment_status}
+                                                            {
+                                                                order.payment_status
+                                                            }
                                                         </span>
                                                     </div>
                                                     <div className="flex justify-between gap-4">
@@ -303,14 +310,18 @@ const OrderedPage = () => {
                                                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                                                     <div>
                                                                         <p className="text-xs font-black uppercase tracking-[0.16em] text-black">
-                                                                            {
+                                                                            {item
+                                                                                .vendor
+                                                                                ?.name ??
                                                                                 item
-                                                                                    .vendor
-                                                                                    ?.name
-                                                                            }
+                                                                                    .seller
+                                                                                    ?.name ??
+                                                                                "Private Seller"}
                                                                         </p>
                                                                         <p className="mt-2 text-lg font-semibold text-black">
-                                                                            {item.product_name}
+                                                                            {
+                                                                                item.product_name
+                                                                            }
                                                                         </p>
                                                                     </div>
                                                                     <span
@@ -376,6 +387,19 @@ const OrderedPage = () => {
                                                                         >
                                                                             View Product
                                                                         </Link>
+                                                                    ) : null}
+                                                                    {!item
+                                                                        .vendor
+                                                                        ?.link &&
+                                                                    item.seller
+                                                                        ?.name ? (
+                                                                        <span className="rounded-full border border-black/12 bg-[#faf6f1] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-black/60">
+                                                                            {item.item_source ===
+                                                                            "user_sale"
+                                                                                ? "User Sale Purchase"
+                                                                                : item.seller
+                                                                                      .name}
+                                                                        </span>
                                                                     ) : null}
                                                                     {item.vendor
                                                                         ?.link ? (

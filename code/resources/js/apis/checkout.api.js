@@ -30,6 +30,7 @@ const useCheckout = () => {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["checkout-context"] });
             queryClient.invalidateQueries({ queryKey: ["cart"] });
+            queryClient.invalidateQueries({ queryKey: ["user-orders"] });
 
             if (variables?.product_id) {
                 queryClient.invalidateQueries({
@@ -38,6 +39,11 @@ const useCheckout = () => {
                 queryClient.invalidateQueries({
                     queryKey: ["product", variables.product_id],
                 });
+            }
+
+            if (variables?.user_sale_id) {
+                queryClient.invalidateQueries({ queryKey: ["sell-products"] });
+                queryClient.invalidateQueries({ queryKey: ["user-sales"] });
             }
         },
     });

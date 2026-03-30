@@ -17,6 +17,12 @@ class UserSaleResource extends JsonResource
             ->filter()
             ->map(fn (string $path) => $this->resolveImageUrl($path))
             ->values();
+        $gallery = $images->values()->map(fn (string $src, int $index) => [
+            'id' => "sale-{$this->id}-{$index}",
+            'src' => $src,
+            'alt' => $this->name,
+            'is_primary' => $index === 0,
+        ]);
 
         return [
             'id' => $this->id,
@@ -25,6 +31,7 @@ class UserSaleResource extends JsonResource
             'images' => $images->all(),
             'image' => $images->first(),
             'images_count' => $images->count(),
+            'gallery' => $gallery->all(),
             'actual_price' => $actualPrice,
             'actual_price_formatted' => $this->formatPlainNumber($actualPrice),
             'compare_at_price' => $compareAtPrice,
@@ -37,6 +44,13 @@ class UserSaleResource extends JsonResource
             'sale_status' => $this->sale_status,
             'status' => $this->status,
             'is_sold' => $this->sale_status === 'sold',
+            'seller' => $this->user ? [
+                'id' => $this->user->id,
+                'name' => $this->user->full_name,
+                'avatar' => $this->user->avatar
+                    ? $this->resolveImageUrl($this->user->avatar)
+                    : null,
+            ] : null,
             'posted_at' => $this->created_at?->toISOString(),
             'posted_at_formatted' => $this->created_at?->format('M d, Y'),
         ];
