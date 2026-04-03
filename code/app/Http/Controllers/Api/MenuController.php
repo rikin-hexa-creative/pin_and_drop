@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -79,6 +80,71 @@ class MenuController extends Controller
                 ['label' => 'See All Categories', 'to' => '/categories/all']
             ),
             'womenswear' => $formatCategoryMenu(
+                $womenswearCategory,
+                'womenswear',
+                'WOMENSWEAR',
+                'Shop By Category',
+                ['label' => 'See All Categories', 'to' => '/categories/womenswear/all']
+            ),
+        ]);
+    }
+
+    public function homepageCategories(): JsonResponse
+    {
+        $menswearCategory = Category::where('slug', 'mens-wear')->active()->first();
+        $womenswearCategory = Category::where('slug', 'women-wears')->active()->first();
+
+        $resolveImageUrl = function (?string $path): ?string {
+            if (! $path) {
+                return null;
+            }
+
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+
+            $normalizedPath = ltrim($path, '/');
+
+            if (str_starts_with($normalizedPath, 'storage/')) {
+                return url($normalizedPath);
+            }
+
+            return Storage::disk('public')->url($normalizedPath);
+        };
+
+        $formatHomepageMenu = function ($category, $id, $label, $title, $cta) use ($resolveImageUrl) {
+            $columns = [];
+            if ($category) {
+                $children = $category->children()->active()->ordered()->get();
+                foreach ($children as $child) {
+                    $columns[] = [
+                        'heading' => [
+                            'label' => $child->name,
+                            'image' => $resolveImageUrl($child->image),
+                            'to'    => '/categories/' . $child->slug,
+                        ],
+                    ];
+                }
+            }
+
+            return [
+                'id'      => $id,
+                'label'   => $label,
+                'title'   => $title,
+                'cta'     => $cta,
+                'columns' => $columns,
+            ];
+        };
+
+        return response()->json([
+            'menswear'   => $formatHomepageMenu(
+                $menswearCategory,
+                'menswear',
+                'MENSWEAR',
+                'Shop By Category',
+                ['label' => 'See All Categories', 'to' => '/categories/all']
+            ),
+            'womenswear' => $formatHomepageMenu(
                 $womenswearCategory,
                 'womenswear',
                 'WOMENSWEAR',

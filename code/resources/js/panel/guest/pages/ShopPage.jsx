@@ -6,7 +6,7 @@ import {
     useState,
 } from "react";
 import { Link } from "react-router-dom";
-import { useCategories } from "../../../apis/categories.api";
+import { useCategories, useCategoryMenu } from "../../../apis/categories.api";
 import { useProductFilters, useProducts } from "../../../apis/product.api";
 import ProductCard from "../../../components/product/ProductCard";
 import { formatCurrency } from "../../../utils/currency";
@@ -140,8 +140,74 @@ const FilterToggle = ({
     </button>
 );
 
+const CategoryMenuFilter = ({ menuData, selectedCategories, onToggleCategory }) => {
+    if (!menuData) {
+        return <p className="text-xs text-black/45">Loading categories...</p>;
+    }
+
+    const groups = Object.values(menuData);
+
+    if (!groups.length) {
+        return <p className="text-xs text-black/45">No categories available.</p>;
+    }
+
+    return (
+        <div className="space-y-5">
+            {groups.map((group) => (
+                <div key={group.id}>
+                    <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.3em] text-black/35 font-['Space_Grotesk']">
+                        {group.label}
+                    </p>
+                    <div className="space-y-1">
+                        {group.columns.map((col, colIdx) => {
+                            return (
+                                <div key={colIdx}>
+                                    <div className="flex items-center justify-between px-3 py-2">
+                                        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-black/50 font-['Space_Grotesk']">
+                                            {col.heading.label}
+                                        </span>
+                                        {col.links?.length > 0 && (
+                                            <span className="text-[10px] font-bold text-black/25">
+                                                {col.links.length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {col.links?.length > 0 && (
+                                        <div className="ml-3 mt-1 space-y-1 border-l border-black/8 pl-3">
+                                            {col.links.map((link) => {
+                                                const linkSlug = link.to.split("/").filter(Boolean).pop();
+                                                const isLinkActive = selectedCategories.includes(linkSlug);
+                                                return (
+                                                    <button
+                                                        key={link.to}
+                                                        type="button"
+                                                        onClick={() => onToggleCategory(linkSlug)}
+                                                        className={`flex w-full items-center border px-3 py-1.5 text-left transition ${
+                                                            isLinkActive
+                                                                ? "border-black bg-black text-white"
+                                                                : "border-black/8 bg-[#faf8f5] text-black/70 hover:border-black/30 hover:text-black"
+                                                        }`}
+                                                    >
+                                                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] font-['Space_Grotesk']">
+                                                            {link.label}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const FiltersPanel = ({
-    categoryOptions,
+    categoryMenuData,
     colorOptions,
     designerOptions,
     maxPriceInput,
@@ -179,22 +245,12 @@ const FiltersPanel = ({
             </div>
         </FilterSection>
 
-        <FilterSection title="Categories" subtitle="Approved categories only">
-            <div className="space-y-2">
-                {categoryOptions.length ? (
-                    categoryOptions.map((category) => (
-                        <FilterToggle
-                            key={category.id}
-                            active={selectedCategories.includes(category.id)}
-                            count={category.products_count}
-                            label={category.name}
-                            onClick={() => onToggleCategory(category.id)}
-                        />
-                    ))
-                ) : (
-                    <p className="text-xs text-black/45">No category filters available.</p>
-                )}
-            </div>
+        <FilterSection title="Categories" subtitle="Browse by hierarchy">
+            <CategoryMenuFilter
+                menuData={categoryMenuData}
+                selectedCategories={selectedCategories}
+                onToggleCategory={onToggleCategory}
+            />
         </FilterSection>
 
         <FilterSection title="Sizes" subtitle="From active product variants">
@@ -316,6 +372,7 @@ const ShopPage = () => {
     const maxPrice = parsePriceValue(deferredMaxPrice);
 
     const { data: categories = [], error: categoriesError } = useCategories();
+    const { data: categoryMenuData } = useCategoryMenu();
     const {
         data: filterData = {},
         error: filterError,
@@ -390,10 +447,19 @@ const ShopPage = () => {
         (deferredSearch ? 1 : 0) +
         (minPrice !== undefined || maxPrice !== undefined ? 1 : 0);
 
-    const onToggleCategory = (value) => {
+    // Build a slug→id lookup from the flat categories list
+    const slugToId = new Map(
+        categories.map((cat) => [cat.slug, cat.id])
+    );
+
+    // Resolve a category slug to its numeric ID (for the API filter)
+    const resolveSlugToId = (slug) => slugToId.get(slug) ?? slug;
+
+    const onToggleCategory = (slugOrId) => {
+        const id = typeof slugOrId === "string" ? resolveSlugToId(slugOrId) : slugOrId;
         startTransition(() => {
             setSelectedCategories((currentValues) =>
-                toggleSelection(currentValues, value)
+                toggleSelection(currentValues, id)
             );
         });
     };
@@ -435,8 +501,14 @@ const ShopPage = () => {
         });
     };
 
+    // Build slug array for active display in the hierarchical menu
+    const activeSlugs = selectedCategories.map((id) => {
+        const cat = categories.find((c) => c.id === id);
+        return cat?.slug ?? String(id);
+    });
+
     const categoryLookup = new Map(
-        categoryOptions.map((category) => [category.id, category.name])
+        categories.map((category) => [category.id, category.name])
     );
 
     const activeFilterChips = [
@@ -445,11 +517,14 @@ const ShopPage = () => {
             label: designer,
             onRemove: () => onToggleDesigner(designer),
         })),
-        ...selectedCategories.map((categoryId) => ({
-            key: `category-${categoryId}`,
-            label: categoryLookup.get(categoryId) ?? `Category ${categoryId}`,
-            onRemove: () => onToggleCategory(categoryId),
-        })),
+        ...selectedCategories.map((categoryId) => {
+            const cat = categories.find((c) => c.id === categoryId);
+            return {
+                key: `category-${categoryId}`,
+                label: cat?.name ?? categoryLookup.get(categoryId) ?? `Category ${categoryId}`,
+                onRemove: () => onToggleCategory(categoryId),
+            };
+        }),
         ...selectedSizes.map((size) => ({
             key: `size-${size}`,
             label: `Size ${size}`,
@@ -497,13 +572,13 @@ const ShopPage = () => {
                         </div>
 
                         <FiltersPanel
-                            categoryOptions={categoryOptions}
+                            categoryMenuData={categoryMenuData}
                             colorOptions={colorOptions}
                             designerOptions={designerOptions}
                             maxPriceInput={maxPriceInput}
                             minPriceInput={minPriceInput}
                             priceBounds={priceBounds}
-                            selectedCategories={selectedCategories}
+                            selectedCategories={activeSlugs}
                             selectedColors={selectedColors}
                             selectedDesigners={selectedDesigners}
                             selectedSizes={selectedSizes}
@@ -526,13 +601,13 @@ const ShopPage = () => {
                                 </summary>
                                 <div className="mt-6">
                                     <FiltersPanel
-                                        categoryOptions={categoryOptions}
+                                        categoryMenuData={categoryMenuData}
                                         colorOptions={colorOptions}
                                         designerOptions={designerOptions}
                                         maxPriceInput={maxPriceInput}
                                         minPriceInput={minPriceInput}
                                         priceBounds={priceBounds}
-                                        selectedCategories={selectedCategories}
+                                        selectedCategories={activeSlugs}
                                         selectedColors={selectedColors}
                                         selectedDesigners={selectedDesigners}
                                         selectedSizes={selectedSizes}

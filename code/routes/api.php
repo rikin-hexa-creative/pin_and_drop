@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/menus/vendors', [MenuController::class, 'vendors']);
 Route::get('/menus/categories', [MenuController::class, 'categories']);
+Route::get('/homepage/menu/categories', [MenuController::class, 'homepageCategories']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/sell', [UserSaleController::class, 'catalogIndex']);

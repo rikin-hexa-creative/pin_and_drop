@@ -22,20 +22,17 @@ export const collections = [
     {
         title: "Archive Outerwear",
         subtitle: "Cold weather grails",
-        image:
-            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80",
     },
     {
         title: "Footwear Rotation",
         subtitle: "Sneakers and boots",
-        image:
-            "https://images.unsplash.com/photo-1521579971123-119293719870?auto=format&fit=crop&w=800&q=80",
+        image: "https://t4.ftcdn.net/jpg/03/83/72/35/360_F_383723590_htmZf74auhyhPFvQUGQecrt4ZA7VzuYW.jpg",
     },
     {
         title: "Tailored Edge",
         subtitle: "Sharp layers",
-        image:
-            "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=800&q=80",
     },
 ];
 
@@ -210,8 +207,7 @@ export const homepageModules = [
         title: "The 9th Circle of Fashion Hell",
         description:
             "Step into the 9th circle of fashion hell and shop our favorite artisanal avant-garde pieces from Carol Christian Poell, Guidi, Boris Bidjan Saberi and more.",
-        image:
-            "https://images.ctfassets.net/bdvz0u6oqffk/eVHQohs0ZX4epdYWhi9uy/49b55541bb88c6099b148a7f4845d459/Homepage-m_Auralee.jpg",
+        image: "https://images.ctfassets.net/bdvz0u6oqffk/eVHQohs0ZX4epdYWhi9uy/49b55541bb88c6099b148a7f4845d459/Homepage-m_Auralee.jpg",
     },
     {
         kind: "preview",
@@ -241,8 +237,7 @@ export const homepageModules = [
         title: "Streetwear's Next Generation",
         description:
             "Shop pieces from the names defining today's streetwear scene, including Corteiz, GV Gallery, Vale and more.",
-        image:
-            "https://images.ctfassets.net/bdvz0u6oqffk/3vk2tTnkwHUzRQXvO0k4Z9/05d3a934cfca954e734f6465facebfbb/Merch-Module-Desktop__5_.jpg",
+        image: "https://images.ctfassets.net/bdvz0u6oqffk/3vk2tTnkwHUzRQXvO0k4Z9/05d3a934cfca954e734f6465facebfbb/Merch-Module-Desktop__5_.jpg",
     },
     {
         kind: "preview",
@@ -265,8 +260,7 @@ export const homepageModules = [
         title: "Best Of: Loafers & Mules",
         description:
             "From classic horsebit styles and scrunched-toe loafers to lounge-ready mules, shop community favorites from Gucci, The Row, Blackstock & Weber and more.",
-        image:
-            "https://images.ctfassets.net/bdvz0u6oqffk/BeoaGZjVvob7J3nQKIv8U/a469526448433dd60de95582caa37c95/Homepage-m_YasuyukiSL__3_.jpg",
+        image: "https://images.ctfassets.net/bdvz0u6oqffk/BeoaGZjVvob7J3nQKIv8U/a469526448433dd60de95582caa37c95/Homepage-m_YasuyukiSL__3_.jpg",
     },
     {
         kind: "preview",
@@ -296,8 +290,7 @@ export const homepageModules = [
         title: "In Conversation: Yuki Matsuda",
         description:
             "Yuketen's Yuki Matsuda on spotting a 1930s silhouette, building pride into what you wear and why a well-made shoe is a wearable work of art.",
-        image:
-            "https://images.ctfassets.net/bdvz0u6oqffk/3vk2tTnkwHUzRQXvO0k4Z9/05d3a934cfca954e734f6465facebfbb/Merch-Module-Desktop__5_.jpg",
+        image: "https://t4.ftcdn.net/jpg/09/86/78/71/360_F_986787157_cd6wih7HzRh2GiC4coGHbj7koLdg07Yx.jpg",
     },
     {
         kind: "preview",
@@ -308,75 +301,3 @@ export const homepageModules = [
     },
 ];
 
-export const categoryGroups = [
-    {
-        title: "Shop Menswear",
-        items: [
-            {
-                title: "Tops",
-                href: "/categories/tops",
-                image: "https://media-assets.grailed.com/prd/misc/8fda5c6f43a9458ea40cd83d608a9f10",
-            },
-            {
-                title: "Bottoms",
-                href: "/categories/bottoms",
-                image: "https://media-assets.grailed.com/prd/misc/2410ef3c87df47b8a9faa59e98cd985a",
-            },
-            {
-                title: "Outerwear",
-                href: "/categories/outerwear",
-                image: "https://media-assets.grailed.com/prd/misc/a688bc0d112244cd88c1f70566da7f30",
-            },
-            {
-                title: "Footwear",
-                href: "/categories/footwear",
-                image: "https://media-assets.grailed.com/prd/misc/6420b439e3df49cab399a6275af8b98b",
-            },
-            {
-                title: "Tailoring",
-                href: "/categories/tailoring",
-                image: "https://media-assets.grailed.com/prd/misc/ffc3c5500ed34b02ae7d2c94de13b5c6",
-            },
-            {
-                title: "Accessories",
-                href: "/categories/accessories",
-                image: "https://media-assets.grailed.com/prd/misc/7aeb2d7d079347c18341f65398078c07",
-            },
-        ],
-    },
-    {
-        title: "Shop Womenswear",
-        items: [
-            {
-                title: "Tops",
-                href: "/categories/womenswear/tops",
-                image: "https://media-assets.grailed.com/prd/misc/f59c72b819f248f4beaf6e9aef3db0c8",
-            },
-            {
-                title: "Bottoms",
-                href: "/categories/womenswear/bottoms",
-                image: "https://media-assets.grailed.com/prd/misc/27e54541e3664af58c3a6df705cb8987",
-            },
-            {
-                title: "Outerwear",
-                href: "/categories/womenswear/outerwear",
-                image: "https://media-assets.grailed.com/prd/misc/6abb0c77d3854bd0bf0e3670883fc764",
-            },
-            {
-                title: "Footwear",
-                href: "/categories/womenswear/footwear",
-                image: "https://media-assets.grailed.com/prd/misc/4162f392c7ad48a7bbb28579d7ce8c60",
-            },
-            {
-                title: "Bags & Luggage",
-                href: "/categories/womenswear/bags-luggage",
-                image: "https://media-assets.grailed.com/prd/misc/1c102183ae3147e5bece5ecb568fa0a4",
-            },
-            {
-                title: "Accessories",
-                href: "/categories/womenswear/accessories",
-                image: "https://media-assets.grailed.com/prd/misc/82c0a4374f32429cb0d6559746a30b0c",
-            },
-        ],
-    },
-];

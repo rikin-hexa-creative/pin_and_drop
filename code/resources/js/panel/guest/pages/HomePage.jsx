@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useHomepageCategories } from "../../../apis/homepage.api";
 import {
-    categoryGroups,
     collections,
     heroSlides,
     heroStats,
@@ -18,7 +19,9 @@ const CarouselButton = ({ direction = "next", onClick }) => (
         <svg
             aria-hidden="true"
             viewBox="0 0 16 16"
-            className={`h-4 w-4 ${direction === "prev" ? "rotate-90" : "-rotate-90"}`}
+            className={`h-4 w-4 ${
+                direction === "prev" ? "rotate-90" : "-rotate-90"
+            }`}
         >
             <path
                 d="m3.65 6.15 3.53 3.53h1.64l3.53-3.53"
@@ -42,7 +45,10 @@ const PreviewImageGrid = ({ images, title }) => (
         </div>
 
         {images.slice(1, 5).map((image, index) => (
-            <div key={`${title}-${index}`} className="relative overflow-hidden rounded-[22px]">
+            <div
+                key={`${title}-${index}`}
+                className="relative overflow-hidden rounded-[22px]"
+            >
                 <img
                     src={image}
                     alt=""
@@ -104,7 +110,9 @@ const HomepageModuleCard = ({ module }) => {
                     <p className="text-[11px] font-medium tracking-[0.02em] text-black/55">
                         {module.tag}
                     </p>
-                    <h3 className="text-lg font-semibold text-black">{module.title}</h3>
+                    <h3 className="text-lg font-semibold text-black">
+                        {module.title}
+                    </h3>
                 </div>
                 <PreviewImageGrid images={module.images} title={module.title} />
             </div>
@@ -134,7 +142,9 @@ const CategoryGroup = ({ group }) => (
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
                         />
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-black">{item.title}</p>
+                    <p className="mt-3 text-sm font-semibold text-black">
+                        {item.title}
+                    </p>
                 </a>
             ))}
         </div>
@@ -143,9 +153,31 @@ const CategoryGroup = ({ group }) => (
 
 const HomePage = () => {
     const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+    const { data: categoriesData, isLoading: isCategoriesLoading } =
+        useHomepageCategories();
+    console.log(categoriesData);
+
+    const categoryGroups = categoriesData
+        ? Object.values(categoriesData).map((group) => ({
+              title:
+                  group.title ||
+                  (group.id === "menswear"
+                      ? "Shop Menswear"
+                      : group.id === "womenswear"
+                      ? "Shop Womenswear"
+                      : group.label),
+              items: group.columns.map((col) => ({
+                  title: col.heading.label,
+                  image: col.heading.image,
+                  href: col.heading.to,
+              })),
+          }))
+        : [];
 
     const showPreviousSlide = () => {
-        setActiveHeroSlide((current) => (current === 0 ? heroSlides.length - 1 : current - 1));
+        setActiveHeroSlide((current) =>
+            current === 0 ? heroSlides.length - 1 : current - 1
+        );
     };
 
     const showNextSlide = () => {
@@ -161,7 +193,7 @@ const HomePage = () => {
                 <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-8 animate-[fade-up_0.8s_ease-out]">
                         <p className="text-xs font-semibold uppercase tracking-[0.4em] text-black/60">
-                            Curated menswear marketplace
+                            Explore Products, Start Selling, Join Now
                         </p>
                         <h1
                             className="text-4xl font-semibold leading-tight text-black sm:text-5xl lg:text-6xl"
@@ -169,22 +201,25 @@ const HomePage = () => {
                                 fontFamily: "'Space Grotesk', sans-serif",
                             }}
                         >
-                            Discover rare pieces, iconic designers, and the next
-                            grail.
+                            Discover. Pin. Wear Your Style.
                         </h1>
                         <p className="max-w-xl text-base text-black/70">
-                            Shop verified listings from the worlds best
-                            wardrobes. Every day brings fresh drops, curated
-                            edits, and exclusive price drops tailored to your
-                            style.
+                            A fashion marketplace connecting designers, brands,
+                            and style lovers in one place.
                         </p>
                         <div className="flex flex-wrap items-center gap-4">
-                            <button className="rounded-full bg-black px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-xl shadow-black/20 transition hover:-translate-y-0.5">
-                                Shop menswear
-                            </button>
-                            <button className="rounded-full border border-black/20 bg-white/80 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-black transition hover:-translate-y-0.5">
-                                Sell an item
-                            </button>
+                            <Link
+                                to="/my-feed"
+                                className="rounded-full bg-black px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-xl shadow-black/20 transition hover:-translate-y-0.5"
+                            >
+                                Explore Products
+                            </Link>
+                            <Link
+                                to="/sell"
+                                className="rounded-full border border-black/20 bg-white/80 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-black transition hover:-translate-y-0.5"
+                            >
+                                Start Selling
+                            </Link>
                         </div>
                         <div
                             className="grid gap-4 sm:grid-cols-2 animate-[fade-up_0.9s_ease-out]"
@@ -296,7 +331,11 @@ const HomePage = () => {
                         >
                             <div
                                 className="flex transition-transform duration-500 ease-out"
-                                style={{ transform: `translateX(-${activeHeroSlide * 100}%)` }}
+                                style={{
+                                    transform: `translateX(-${
+                                        activeHeroSlide * 100
+                                    }%)`,
+                                }}
                             >
                                 {heroSlides.map((slide) => (
                                     <article
@@ -306,7 +345,10 @@ const HomePage = () => {
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/20 to-transparent" />
                                         <picture>
-                                            <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
+                                            <source
+                                                media="(max-width: 768px)"
+                                                srcSet={slide.mobileImage}
+                                            />
                                             <img
                                                 src={slide.desktopImage}
                                                 alt={slide.title}
@@ -335,17 +377,29 @@ const HomePage = () => {
 
                             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 p-4 sm:p-6">
                                 <div className="flex gap-2">
-                                    <CarouselButton direction="prev" onClick={showPreviousSlide} />
-                                    <CarouselButton direction="next" onClick={showNextSlide} />
+                                    <CarouselButton
+                                        direction="prev"
+                                        onClick={showPreviousSlide}
+                                    />
+                                    <CarouselButton
+                                        direction="next"
+                                        onClick={showNextSlide}
+                                    />
                                 </div>
                                 <div className="flex items-center gap-2 rounded-full bg-black/35 px-3 py-2 backdrop-blur">
                                     {heroSlides.map((slide, index) => (
                                         <button
                                             key={slide.title}
                                             type="button"
-                                            aria-label={`Go to slide ${index + 1}`}
-                                            aria-current={activeHeroSlide === index}
-                                            onClick={() => setActiveHeroSlide(index)}
+                                            aria-label={`Go to slide ${
+                                                index + 1
+                                            }`}
+                                            aria-current={
+                                                activeHeroSlide === index
+                                            }
+                                            onClick={() =>
+                                                setActiveHeroSlide(index)
+                                            }
                                             className={`h-2.5 rounded-full transition ${
                                                 activeHeroSlide === index
                                                     ? "w-8 bg-white"
@@ -367,14 +421,23 @@ const HomePage = () => {
                         </div>
 
                         <div className="grid gap-6">
-                            {categoryGroups.map((group) => (
-                                <CategoryGroup key={group.title} group={group} />
-                            ))}
+                            {isCategoriesLoading ? (
+                                <div className="space-y-4">
+                                    <div className="h-64 animate-pulse rounded-[30px] bg-black/5" />
+                                    <div className="h-64 animate-pulse rounded-[30px] bg-black/5" />
+                                </div>
+                            ) : (
+                                categoryGroups.map((group) => (
+                                    <CategoryGroup
+                                        key={group.title}
+                                        group={group}
+                                    />
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
             </section>
-
         </div>
     );
 };

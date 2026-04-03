@@ -1,0 +1,52 @@
+{
+    "menswear": {
+        "id": "menswear",
+        "label": "MENSWEAR",
+        "title": "Shop By Category",
+        "cta": {
+            "label": "See All Categories",
+            "to": "\/categories\/all"
+        },
+        "columns": [
+            {
+                "heading": {
+                    "label": "Tops Men",
+                    "image": "http:\/\/localhost:8000\/storage\/categories\/01KMKZ5G7J08BW1J74P92VVE02.jpeg",
+                    "to": "\/categories\/tops-men"
+                }
+            },
+            {
+                "heading": {
+                    "label": "Bottoms Mens",
+                    "image": "http:\/\/localhost:8000\/storage\/categories\/01KMKZ76MNZ2VC86FSYKQC7SG0.jpeg",
+                    "to": "\/categories\/bottoms-mens"
+                }
+            }
+        ]
+    },
+    "womenswear": {
+        "id": "womenswear",
+        "label": "WOMENSWEAR",
+        "title": "Shop By Category",
+        "cta": {
+            "label": "See All Categories",
+            "to": "\/categories\/womenswear\/all"
+        },
+        "columns": [
+            {
+                "heading": {
+                    "label": "Top Women",
+                    "image": "http:\/\/localhost:8000\/storage\/categories\/01KMKZEB56JVY5TMWRYY440P95.jpeg",
+                    "to": "\/categories\/top-women"
+                }
+            },
+            {
+                "heading": {
+                    "label": "Bottom Women",
+                    "image": "http:\/\/localhost:8000\/storage\/categories\/01KMKZFGQK0ARQH7FTFY51SPXV.jpeg",
+                    "to": "\/categories\/bottom-women"
+                }
+            }
+        ]
+    }
+}

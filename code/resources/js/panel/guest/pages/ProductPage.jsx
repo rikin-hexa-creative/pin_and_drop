@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import { Pin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAddCartItem } from "../../../apis/cart.api";
@@ -113,7 +114,9 @@ const ProductPage = () => {
     }, [product]);
 
     const selectedVariant =
-        product?.variants?.find((variant) => variant.id === selectedVariantId) ??
+        product?.variants?.find(
+            (variant) => variant.id === selectedVariantId
+        ) ??
         product?.variants?.find(
             (variant) => variant.id === product?.default_variant_id
         ) ??
@@ -187,7 +190,9 @@ const ProductPage = () => {
     }, [gallery, selectedVariant]);
 
     useEffect(() => {
-        setQuantity((currentValue) => Math.min(currentValue, availableQuantity));
+        setQuantity((currentValue) =>
+            Math.min(currentValue, availableQuantity)
+        );
     }, [availableQuantity]);
 
     const updateVariant = (variant) => {
@@ -200,11 +205,15 @@ const ProductPage = () => {
     };
 
     const handleColorSelect = (color) => {
-        updateVariant(selectVariant(product?.variants ?? [], color, selectedSize));
+        updateVariant(
+            selectVariant(product?.variants ?? [], color, selectedSize)
+        );
     };
 
     const handleSizeSelect = (size) => {
-        updateVariant(selectVariant(product?.variants ?? [], selectedColor, size));
+        updateVariant(
+            selectVariant(product?.variants ?? [], selectedColor, size)
+        );
     };
 
     const decrementQuantity = () => {
@@ -218,7 +227,11 @@ const ProductPage = () => {
     };
 
     const handleAddToCart = async () => {
-        if (!product?.id || !selectedVariant?.id || !selectedVariant?.in_stock) {
+        if (
+            !product?.id ||
+            !selectedVariant?.id ||
+            !selectedVariant?.in_stock
+        ) {
             return;
         }
 
@@ -245,7 +258,11 @@ const ProductPage = () => {
     };
 
     const handleBuyNow = () => {
-        if (!product?.id || !selectedVariant?.id || !selectedVariant?.in_stock) {
+        if (
+            !product?.id ||
+            !selectedVariant?.id ||
+            !selectedVariant?.in_stock
+        ) {
             return;
         }
 
@@ -312,7 +329,6 @@ const ProductPage = () => {
 
     return (
         <div className="bg-[#fbf9f8] text-[#1b1c1c] selection:bg-black selection:text-white">
-
             <main className="mx-auto min-h-screen max-w-[1920px] px-4 pb-20 pt-24 md:px-8 lg:px-12 md:pb-0">
                 <div className="flex flex-col gap-8 lg:flex-row lg:gap-16">
                     <div className="flex flex-1 flex-col-reverse gap-4 md:flex-row">
@@ -391,7 +407,9 @@ const ProductPage = () => {
                                 </p>
                                 {displayedCompareAtPrice ? (
                                     <p className="text-base text-black/35 line-through">
-                                        {formatCurrency(displayedCompareAtPrice)}
+                                        {formatCurrency(
+                                            displayedCompareAtPrice
+                                        )}
                                     </p>
                                 ) : null}
                             </div>
@@ -422,7 +440,11 @@ const ProductPage = () => {
                                                     isActive
                                                         ? "border-black ring-1 ring-black ring-offset-2 ring-offset-[#fbf9f8]"
                                                         : "border-zinc-300 hover:scale-95"
-                                                } ${!color.in_stock ? "opacity-40" : ""}`}
+                                                } ${
+                                                    !color.in_stock
+                                                        ? "opacity-40"
+                                                        : ""
+                                                }`}
                                                 style={{
                                                     backgroundColor:
                                                         color.value,
@@ -448,8 +470,7 @@ const ProductPage = () => {
                                         type="button"
                                         onClick={() =>
                                             setShowSizeChart(
-                                                (currentValue) =>
-                                                    !currentValue
+                                                (currentValue) => !currentValue
                                             )
                                         }
                                         className="font-['Space_Grotesk'] text-[10px] uppercase tracking-widest text-black underline"
@@ -472,16 +493,14 @@ const ProductPage = () => {
                                                 disabled={!size.available}
                                                 onClick={() =>
                                                     size.available &&
-                                                    handleSizeSelect(
-                                                        size.value
-                                                    )
+                                                    handleSizeSelect(size.value)
                                                 }
                                                 className={`py-3 font-['Space_Grotesk'] text-sm transition ${
                                                     !size.available
                                                         ? "cursor-not-allowed border border-zinc-200 text-zinc-300"
                                                         : isActive
-                                                          ? "border border-black bg-black text-white"
-                                                          : "border border-zinc-300 hover:border-black"
+                                                        ? "border border-black bg-black text-white"
+                                                        : "border border-zinc-300 hover:border-black"
                                                 }`}
                                             >
                                                 {size.value}
@@ -550,8 +569,8 @@ const ProductPage = () => {
                                         ? addCartItemMutation.isPending
                                             ? "Adding..."
                                             : isAddedToCart
-                                              ? "Added To Cart"
-                                              : "Add To Cart"
+                                            ? "Added To Cart"
+                                            : "Add To Cart"
                                         : "Out Of Stock"}
                                 </button>
 
@@ -559,19 +578,20 @@ const ProductPage = () => {
                                     type="button"
                                     onClick={() => {
                                         if (!Cookies.get("user_token")) {
-                                            navigate("/sign-in", { state: { redirectTo: window.location.pathname } });
+                                            navigate("/sign-in", {
+                                                state: {
+                                                    redirectTo:
+                                                        window.location
+                                                            .pathname,
+                                                },
+                                            });
                                             return;
                                         }
                                         setIsPinModalOpen(true);
                                     }}
                                     className="border border-zinc-300 p-4 transition-colors hover:bg-[#efeded]"
                                 >
-                                    <span
-                                        className="material-symbols-outlined"
-                                        style={{ fontVariationSettings: "'FILL' 0" }}
-                                    >
-                                        bookmark
-                                    </span>
+                                    <Pin />
                                 </button>
                             </div>
 
@@ -721,10 +741,10 @@ const ProductPage = () => {
                     </Link>
                 ))}
             </nav>
-            <PinModal 
-                isOpen={isPinModalOpen} 
-                onClose={() => setIsPinModalOpen(false)} 
-                productId={product.id} 
+            <PinModal
+                isOpen={isPinModalOpen}
+                onClose={() => setIsPinModalOpen(false)}
+                productId={product.id}
             />
         </div>
     );

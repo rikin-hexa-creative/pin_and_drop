@@ -1,14 +1,21 @@
+import { Pin } from "lucide-react";
 import { useState } from "react";
-import { useGetUserCollections, useCreateCollection, usePinProduct, useUnpinProduct } from "../../apis/collection.api";
+import {
+    useCreateCollection,
+    useGetUserCollections,
+    usePinProduct,
+    useUnpinProduct,
+} from "../../apis/collection.api";
 
 const PinModal = ({ isOpen, onClose, productId }) => {
     const { data: collectionsData, isLoading } = useGetUserCollections({
         enabled: isOpen,
     });
-    const { mutate: createCollection, isPending: isCreating } = useCreateCollection();
+    const { mutate: createCollection, isPending: isCreating } =
+        useCreateCollection();
     const { mutate: pinProduct, isPending: isPinning } = usePinProduct();
     const { mutate: unpinProduct } = useUnpinProduct();
-    
+
     const [newCollectionName, setNewCollectionName] = useState("");
 
     const collections = collectionsData?.data || [];
@@ -18,17 +25,20 @@ const PinModal = ({ isOpen, onClose, productId }) => {
     const handleCreate = (e) => {
         e.preventDefault();
         if (!newCollectionName.trim()) return;
-        
-        createCollection({ name: newCollectionName.trim() }, {
-            onSuccess: (res) => {
-                setNewCollectionName("");
-                // Auto pin to the newly created collection
-                const newId = res.data?.id;
-                if (newId) {
-                    pinProduct({ collectionId: newId, productId });
-                }
+
+        createCollection(
+            { name: newCollectionName.trim() },
+            {
+                onSuccess: (res) => {
+                    setNewCollectionName("");
+                    // Auto pin to the newly created collection
+                    const newId = res.data?.id;
+                    if (newId) {
+                        pinProduct({ collectionId: newId, productId });
+                    }
+                },
             }
-        });
+        );
     };
 
     const togglePin = (collection) => {
@@ -43,12 +53,17 @@ const PinModal = ({ isOpen, onClose, productId }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-[#fbf9f8] w-full max-w-md shadow-2xl">
                 <div className="flex items-center justify-between border-b border-[#cfc4c5]/20 p-6">
-                    <h2 className="font-['Inter'] text-xl font-black uppercase tracking-tighter">Save to Archive</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-[#efeded] transition-colors">
+                    <h2 className="font-['Inter'] text-xl font-black uppercase tracking-tighter">
+                        Create A Board
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-[#efeded] transition-colors"
+                    >
                         <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                
+
                 <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
                     {isLoading ? (
                         <div className="animate-pulse flex flex-col gap-4">
@@ -57,17 +72,17 @@ const PinModal = ({ isOpen, onClose, productId }) => {
                         </div>
                     ) : collections.length > 0 ? (
                         <ul className="space-y-2">
-                            {collections.map(c => (
+                            {collections.map((c) => (
                                 <li key={c.id}>
-                                    <button 
+                                    <button
                                         onClick={() => togglePin(c)}
                                         disabled={isPinning}
                                         className="w-full text-left flex items-center justify-between p-4 border border-[#cfc4c5]/40 hover:border-black transition-colors group bg-white"
                                     >
-                                        <span className="font-['Space_Grotesk'] text-sm tracking-widest uppercase font-bold">{c.name}</span>
-                                        <span className="material-symbols-outlined text-black/20 group-hover:text-black transition-colors">
-                                            bookmark_add
+                                        <span className="font-['Space_Grotesk'] text-sm tracking-widest uppercase font-bold">
+                                            {c.name}
                                         </span>
+                                        <Pin />
                                     </button>
                                 </li>
                             ))}
@@ -81,16 +96,18 @@ const PinModal = ({ isOpen, onClose, productId }) => {
 
                 <div className="border-t border-[#cfc4c5]/20 p-6 bg-[#f5f3f3]">
                     <form onSubmit={handleCreate} className="flex gap-2">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             placeholder="NEW COLLECTION NAME..."
                             value={newCollectionName}
-                            onChange={(e) => setNewCollectionName(e.target.value)}
+                            onChange={(e) =>
+                                setNewCollectionName(e.target.value)
+                            }
                             className="w-full border-none bg-white px-4 py-3 font-['Space_Grotesk'] text-xs tracking-widest uppercase focus:ring-1 focus:ring-black"
                             required
                         />
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             disabled={isCreating || !newCollectionName.trim()}
                             className="bg-black text-white px-6 font-['Inter'] text-xs tracking-[0.2em] font-black uppercase transition-colors hover:bg-zinc-800 disabled:opacity-50"
                         >

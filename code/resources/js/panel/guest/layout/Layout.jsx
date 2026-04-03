@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Footer from "../../../components/site/Footer";
 import Header from "../../../components/site/Header";
@@ -12,6 +13,16 @@ const Layout = () => {
         location.pathname.startsWith("/product/") ||
         location.pathname === "/sell" ||
         location.pathname.startsWith("/sell/product/");
+
+    useEffect(() => {
+        if (location.hash) {
+            document
+                .getElementById(location.hash.replace("#", ""))
+                ?.scrollIntoView({ behavior: "smooth" });
+        } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    }, [location]);
 
     return (
         <div
