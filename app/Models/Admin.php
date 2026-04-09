@@ -93,7 +93,7 @@ class Admin extends Authenticatable implements FilamentUser, HasName
 
     public function getFilamentName(): string
     {
-        return $this->full_name;
+        return $this->full_name ?? $this->email;
     }
 
     // -------------------------------------------------------------------------
