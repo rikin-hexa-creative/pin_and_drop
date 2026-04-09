@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name', 100);
+            $table->string('full_name', 100)->nullable();;
             $table->string('email', 150)->unique();
             $table->string('password');
             $table->enum('role', ['super_admin', 'moderator', 'support'])->default('moderator');
