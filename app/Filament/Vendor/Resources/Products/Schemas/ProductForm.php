@@ -78,8 +78,17 @@ class ProductForm
                             FileUpload::make('image_url')
                                 ->image()
                                 ->disk('public')
+                                ->visibility('public')
                                 ->directory('products')
                                 ->required()
+                                ->imageEditor()
+                                ->imageEditorAspectRatioOptions([
+                                    null,
+                                    '1:1',
+                                    '3:4',
+                                    '4:5',
+                                    '16:9',
+                                ])
                                 ->openable()
                                 ->downloadable()
                                 ->imagePreviewHeight('140')

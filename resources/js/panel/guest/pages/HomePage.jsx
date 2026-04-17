@@ -420,7 +420,7 @@ const HomePage = () => {
                             ))}
                         </div>
 
-                        <div className="grid gap-6">
+                        {/* <div className="grid gap-6">
                             {isCategoriesLoading ? (
                                 <div className="space-y-4">
                                     <div className="h-64 animate-pulse rounded-[30px] bg-black/5" />
@@ -434,7 +434,7 @@ const HomePage = () => {
                                     />
                                 ))
                             )}
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </section>

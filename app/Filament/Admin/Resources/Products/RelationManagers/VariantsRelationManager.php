@@ -57,7 +57,16 @@ class VariantsRelationManager extends RelationManager
                 ->image()
                 ->multiple()
                 ->disk('public')
+                ->visibility('public')
                 ->directory('product-variants')
+                ->imageEditor()
+                ->imageEditorAspectRatioOptions([
+                    null,
+                    '1:1',
+                    '3:4',
+                    '4:5',
+                    '16:9',
+                ])
                 ->openable()
                 ->downloadable()
                 ->imagePreviewHeight('120'),

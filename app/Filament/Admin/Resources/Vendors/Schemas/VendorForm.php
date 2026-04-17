@@ -42,10 +42,12 @@ class VendorForm
                     FileUpload::make('logo')
                         ->image()
                         ->disk('public')
+                        ->visibility('public')
                         ->directory('vendors/logos'),
                     FileUpload::make('banner')
                         ->image()
                         ->disk('public')
+                        ->visibility('public')
                         ->directory('vendors/banners'),
                     Textarea::make('description')
                         ->columnSpanFull(),

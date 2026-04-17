@@ -38,6 +38,7 @@ class CategoryForm
                     FileUpload::make('image')
                         ->image()
                         ->disk('public')
+                        ->visibility('public')
                         ->directory('categories'),
                     TextInput::make('sort_order')
                         ->integer()

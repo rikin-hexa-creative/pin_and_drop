@@ -33,6 +33,7 @@ class UserForm
                     FileUpload::make('avatar')
                         ->image()
                         ->disk('public')
+                        ->visibility('public')
                         ->directory('users/avatars'),
                     Toggle::make('is_active')
                         ->label('Active')
