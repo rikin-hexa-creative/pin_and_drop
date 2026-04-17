@@ -71,7 +71,7 @@ const PinPage = () => {
             <main className="pb-32 px-6 md:px-12 max-w-7xl mx-auto pt-12">
                 <header className="mb-16">
                     <h1 className="font-['Inter'] text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none mb-4">
-                        YOUR ARCHIVE
+                        YOUR BOARDS
                     </h1>
                     <div className="flex items-baseline justify-between border-b border-[#cfc4c5]/20 pb-4">
                         <p className="font-['Space_Grotesk'] text-sm tracking-widest uppercase text-[#4c4546]">

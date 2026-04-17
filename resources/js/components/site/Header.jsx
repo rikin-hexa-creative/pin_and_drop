@@ -407,7 +407,7 @@ const profileMenu = {
     username: { label: "senyad5139", to: "/user-profile" },
     accountLinks: [
         // { label: "FAVORITES", to: "/favorites" },
-        { label: "PIN", to: "/pin" },
+        { label: "Boards", to: "/pin" },
         { label: "CART", to: "/cart" },
         { label: "ORDERS", to: "/ordered" },
     ],
@@ -744,7 +744,7 @@ const Header = () => {
                                     <source src="https://assets.grailed.com/logo.webm" type="video/webm" />
                                     <source src="https://assets.grailed.com/logo.mp4" type="video/mp4" />
                                 </video> */}
-                                Pin & Wear
+                                <img src="/logo/logo_two.png" alt="Logo" className="size-20 object-contain"/>
                             </AppLink>
                         </div>
                     </div>
