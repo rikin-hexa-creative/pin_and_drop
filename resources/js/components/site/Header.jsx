@@ -1,11 +1,11 @@
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCategoryMenu } from "../../apis/categories.api";
 import { useVendorMenu } from "../../apis/vendor.api";
 import { useUser } from "../../context/UserContext";
 
-const APP_ROUTES = new Set(["/", "/shop"]);
+const SEARCH_ROUTES = new Set(["/shop", "/my-feed"]);
 
 const fallbackVendorsMenu = {
     id: "vendors",
@@ -637,6 +637,8 @@ const renderMobileMegaMenu = (menu) => {
 
 const Header = () => {
     const { user, setUser } = useUser();
+    const location = useLocation();
+    const navigate = useNavigate();
     const { data: vendorsMenuData } = useVendorMenu();
     const { data: categoriesMenuData } = useCategoryMenu();
 
@@ -645,11 +647,14 @@ const Header = () => {
     const womenswearMenu =
         categoriesMenuData?.womenswear || fallbackWomenswearMenu;
 
+
+
     const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
 
     const [activeMenu, setActiveMenu] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const [searchInput, setSearchInput] = useState("");
     const profileMenuRef = useRef(null);
     const isAuthenticated = Boolean(user);
     const userDisplayName =
@@ -657,6 +662,20 @@ const Header = () => {
     const userAvatar =
         "/storage/" + user?.avatar ||
         "https://media-assets.grailed.com/prd/misc/PVEFHQYACL92VZTZETOTVQNFENXZW7S5U0MLUG";
+
+    useEffect(() => {
+        if (!SEARCH_ROUTES.has(location.pathname)) {
+            setSearchInput("");
+            return;
+        }
+
+        const nextSearchValue =
+            new URLSearchParams(location.search).get("search") ?? "";
+
+        setSearchInput((currentValue) =>
+            currentValue === nextSearchValue ? currentValue : nextSearchValue
+        );
+    }, [location.pathname, location.search]);
 
     useEffect(() => {
         if (!profileMenuOpen) {
@@ -706,6 +725,26 @@ const Header = () => {
     };
 
     const closeProfileMenu = () => setProfileMenuOpen(false);
+    const handleSearchSubmit = (event) => {
+        event.preventDefault();
+
+        const nextSearchValue = searchInput.trim();
+        const nextSearchParams = new URLSearchParams();
+
+        if (nextSearchValue) {
+            nextSearchParams.set("search", nextSearchValue);
+        }
+
+        setActiveMenu(null);
+        setMobileMenuOpen(false);
+        setProfileMenuOpen(false);
+
+        navigate({
+            pathname: "/my-feed",
+            search: nextSearchParams.toString(),
+        });
+    };
+
     const handleSignOut = () => {
         Cookies.remove("user_token");
         setUser(null);
@@ -752,13 +791,17 @@ const Header = () => {
                     <div className="hidden lg:block">
                         <form
                             className="flex items-center gap-2"
-                            onSubmit={(event) => event.preventDefault()}
+                            onSubmit={handleSearchSubmit}
                         >
                             <label className="relative flex-1">
                                 <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-black/60">
                                     <SearchIcon />
                                 </span>
                                 <input
+                                    value={searchInput}
+                                    onChange={(event) =>
+                                        setSearchInput(event.target.value)
+                                    }
                                     type="search"
                                     placeholder="Search for anything"
                                     className="h-10 w-full border border-black/15 bg-white pl-10 pr-4 text-sm text-black placeholder:text-black/40 focus:border-black focus:outline-none"

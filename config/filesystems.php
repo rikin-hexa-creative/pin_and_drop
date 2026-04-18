@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Use same-origin URLs by default so FilePond / Filament previews keep working
+            // even when the app is opened via a host alias like 127.0.0.1 instead of APP_URL.
+            'url' => env('FILESYSTEM_PUBLIC_URL'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

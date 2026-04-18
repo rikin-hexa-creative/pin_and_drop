@@ -5,7 +5,7 @@ import {
     useRef,
     useState,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCategories, useCategoryMenu } from "../../../apis/categories.api";
 import { useProductFilters, useProducts } from "../../../apis/product.api";
 import ProductCard from "../../../components/product/ProductCard";
@@ -65,6 +65,20 @@ const buildPriceLabel = (minPrice, maxPrice) => {
     }
 
     return "";
+};
+
+const useDebouncedValue = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [delay, value]);
+
+    return debouncedValue;
 };
 
 const LoadingCard = () => (
@@ -355,7 +369,9 @@ const FiltersPanel = ({
 );
 
 const ShopPage = () => {
-    const [searchInput, setSearchInput] = useState("");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const urlSearchValue = searchParams.get("search") ?? "";
+    const [searchInput, setSearchInput] = useState(urlSearchValue);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedDesigners, setSelectedDesigners] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]);
@@ -365,11 +381,63 @@ const ShopPage = () => {
     const [maxPriceInput, setMaxPriceInput] = useState("");
     const loadMoreRef = useRef(null);
 
-    const deferredSearch = useDeferredValue(searchInput.trim());
+    const debouncedSearchInput = useDebouncedValue(searchInput, 350);
+    const debouncedSearch = debouncedSearchInput.trim();
     const deferredMinPrice = useDeferredValue(minPriceInput);
     const deferredMaxPrice = useDeferredValue(maxPriceInput);
     const minPrice = parsePriceValue(deferredMinPrice);
     const maxPrice = parsePriceValue(deferredMaxPrice);
+
+    useEffect(() => {
+        setSearchInput((currentValue) =>
+            currentValue === urlSearchValue ? currentValue : urlSearchValue
+        );
+    }, [urlSearchValue]);
+
+    useEffect(() => {
+        if (searchInput !== debouncedSearchInput) {
+            return;
+        }
+
+        const nextSearchParams = new URLSearchParams(searchParams);
+
+        if (debouncedSearch) {
+            nextSearchParams.set("search", debouncedSearch);
+        } else {
+            nextSearchParams.delete("search");
+        }
+
+        const nextSearchString = nextSearchParams.toString();
+        const currentSearchString = searchParams.toString();
+
+        if (nextSearchString === currentSearchString) {
+            return;
+        }
+
+        setSearchParams(nextSearchParams, { replace: true });
+    }, [
+        debouncedSearch,
+        debouncedSearchInput,
+        searchInput,
+        searchParams,
+        setSearchParams,
+    ]);
+
+    const handleSearchInputChange = (value) => {
+        setSearchInput(value);
+    };
+
+    const clearSearch = () => {
+        setSearchInput("");
+
+        if (!searchParams.has("search")) {
+            return;
+        }
+
+        const nextSearchParams = new URLSearchParams(searchParams);
+        nextSearchParams.delete("search");
+        setSearchParams(nextSearchParams, { replace: true });
+    };
 
     const { data: categories = [], error: categoriesError } = useCategories();
     const { data: categoryMenuData } = useCategoryMenu();
@@ -380,7 +448,7 @@ const ShopPage = () => {
     } = useProductFilters();
 
     const productParams = {
-        search: deferredSearch || undefined,
+        search: debouncedSearch || undefined,
         category: selectedCategories,
         designer: selectedDesigners,
         size: selectedSizes,
@@ -444,7 +512,7 @@ const ShopPage = () => {
         selectedDesigners.length +
         selectedSizes.length +
         selectedColors.length +
-        (deferredSearch ? 1 : 0) +
+        (debouncedSearch ? 1 : 0) +
         (minPrice !== undefined || maxPrice !== undefined ? 1 : 0);
 
     // Build a slug→id lookup from the flat categories list
@@ -490,7 +558,7 @@ const ShopPage = () => {
 
     const clearAllFilters = () => {
         startTransition(() => {
-            setSearchInput("");
+            clearSearch();
             setSelectedCategories([]);
             setSelectedDesigners([]);
             setSelectedSizes([]);
@@ -537,11 +605,11 @@ const ShopPage = () => {
         })),
     ];
 
-    if (deferredSearch) {
+    if (debouncedSearch) {
         activeFilterChips.unshift({
             key: "search",
-            label: `Search: ${deferredSearch}`,
-            onRemove: () => setSearchInput(""),
+            label: `Search: ${debouncedSearch}`,
+            onRemove: clearSearch,
         });
     }
 
@@ -633,7 +701,7 @@ const ShopPage = () => {
                                     <input
                                         value={searchInput}
                                         onChange={(event) =>
-                                            setSearchInput(event.target.value)
+                                            handleSearchInputChange(event.target.value)
                                         }
                                         className="w-full border-b border-black/20 bg-transparent px-0 py-2 pr-8 text-sm uppercase tracking-tighter placeholder:text-black/20 focus:border-black focus:outline-none focus:ring-0 font-['Inter']"
                                         placeholder="Search by product, designer, or category"
