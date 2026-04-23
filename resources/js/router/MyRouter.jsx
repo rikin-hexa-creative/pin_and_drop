@@ -10,6 +10,7 @@ import PinDetailPage from "../panel/guest/pages/PinDetailPage";
 import PinPage from "../panel/guest/pages/PinPage";
 import ProductPage from "../panel/guest/pages/ProductPage";
 import ShopPage from "../panel/guest/pages/ShopPage";
+import VendorsPage from "../panel/guest/pages/VendorsPage";
 import AddForSalePage from "../panel/user/AddForSalePage";
 import ForSalePage from "../panel/user/ForSalePage";
 import SellPage from "../panel/user/SellPage";
@@ -78,6 +79,10 @@ const MyRouter = () => {
                 {
                     path: "/vendors/:id",
                     element: <VendorProfilePage />,
+                },
+                {
+                    path: "/vendors",
+                    element: <VendorsPage />,
                 },
                 {
                     path: "/sell",

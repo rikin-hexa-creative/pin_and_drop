@@ -24,6 +24,16 @@ const sortOptions = [
     { value: "price_desc", label: "Price: High to Low" },
 ];
 
+const getCategorySlugFromPath = (path = "") =>
+    path.split("/").filter(Boolean).pop() ?? "";
+
+const formatCategorySlug = (slug = "") =>
+    slug
+        .split("-")
+        .filter(Boolean)
+        .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+        .join(" ");
+
 const toggleSelection = (values, value) =>
     values.includes(value)
         ? values.filter((currentValue) => currentValue !== value)
@@ -174,23 +184,51 @@ const CategoryMenuFilter = ({ menuData, selectedCategories, onToggleCategory }) 
                     </p>
                     <div className="space-y-1">
                         {group.columns.map((col, colIdx) => {
+                            const headingSlug = getCategorySlugFromPath(
+                                col.heading.to
+                            );
+                            const isHeadingActive =
+                                selectedCategories.includes(headingSlug);
+
                             return (
                                 <div key={colIdx}>
-                                    <div className="flex items-center justify-between px-3 py-2">
-                                        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-black/50 font-['Space_Grotesk']">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            onToggleCategory(headingSlug)
+                                        }
+                                        className={`flex w-full items-center justify-between border px-3 py-2 text-left transition ${
+                                            isHeadingActive
+                                                ? "border-black bg-black text-white"
+                                                : "border-black/10 bg-white text-black hover:border-black/40"
+                                        }`}
+                                    >
+                                        <span className="text-[11px] font-bold uppercase tracking-[0.18em] font-['Space_Grotesk']">
                                             {col.heading.label}
                                         </span>
                                         {col.links?.length > 0 && (
-                                            <span className="text-[10px] font-bold text-black/25">
+                                            <span
+                                                className={`text-[10px] font-bold ${
+                                                    isHeadingActive
+                                                        ? "text-white/70"
+                                                        : "text-black/25"
+                                                }`}
+                                            >
                                                 {col.links.length}
                                             </span>
                                         )}
-                                    </div>
+                                    </button>
                                     {col.links?.length > 0 && (
                                         <div className="ml-3 mt-1 space-y-1 border-l border-black/8 pl-3">
                                             {col.links.map((link) => {
-                                                const linkSlug = link.to.split("/").filter(Boolean).pop();
-                                                const isLinkActive = selectedCategories.includes(linkSlug);
+                                                const linkSlug =
+                                                    getCategorySlugFromPath(
+                                                        link.to
+                                                    );
+                                                const isLinkActive =
+                                                    selectedCategories.includes(
+                                                        linkSlug
+                                                    );
                                                 return (
                                                     <button
                                                         key={link.to}
@@ -372,7 +410,6 @@ const ShopPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const urlSearchValue = searchParams.get("search") ?? "";
     const [searchInput, setSearchInput] = useState(urlSearchValue);
-    const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedDesigners, setSelectedDesigners] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
@@ -380,6 +417,9 @@ const ShopPage = () => {
     const [minPriceInput, setMinPriceInput] = useState("");
     const [maxPriceInput, setMaxPriceInput] = useState("");
     const loadMoreRef = useRef(null);
+    const selectedCategories = Array.from(
+        new Set(searchParams.getAll("category").filter(Boolean))
+    );
 
     const debouncedSearchInput = useDebouncedValue(searchInput, 350);
     const debouncedSearch = debouncedSearchInput.trim();

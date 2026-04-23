@@ -432,6 +432,22 @@ const AppLink = ({ to, children, ...props }) => {
     );
 };
 
+const getCategorySlugFromPath = (path = "") =>
+    path.split("/").filter(Boolean).pop() ?? "";
+
+const buildShopCategoryLink = (path = "") => {
+    const slug = getCategorySlugFromPath(path);
+
+    if (!slug || slug === "all") {
+        return "/shop";
+    }
+
+    const searchParams = new URLSearchParams();
+    searchParams.append("category", slug);
+
+    return `/shop?${searchParams.toString()}`;
+};
+
 const MenuIcon = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 fill-none">
         <path
@@ -562,7 +578,7 @@ const renderDesktopMegaMenu = (menu) => {
                 {menu.columns.map((column) => (
                     <div key={column.heading.label} className="space-y-3">
                         <AppLink
-                            to={column.heading.to}
+                            to={buildShopCategoryLink(column.heading.to)}
                             className="block text-sm font-bold uppercase tracking-[0.08em] text-black"
                         >
                             {column.heading.label}
@@ -571,7 +587,7 @@ const renderDesktopMegaMenu = (menu) => {
                             {column.links.map((item) => (
                                 <AppLink
                                     key={item.label}
-                                    to={item.to}
+                                    to={buildShopCategoryLink(item.to)}
                                     className="block text-sm tracking-[0.02em] text-black/75 transition hover:text-black"
                                 >
                                     {item.label}
@@ -582,7 +598,7 @@ const renderDesktopMegaMenu = (menu) => {
                 ))}
             </div>
             <AppLink
-                to={menu.cta.to}
+                to={buildShopCategoryLink(menu.cta.to)}
                 className="inline-flex text-[11px] font-bold uppercase tracking-[0.22em] text-black"
             >
                 {menu.cta.label}
@@ -613,7 +629,7 @@ const renderMobileMegaMenu = (menu) => {
             {menu.columns.map((column) => (
                 <div key={column.heading.label} className="space-y-2">
                     <AppLink
-                        to={column.heading.to}
+                        to={buildShopCategoryLink(column.heading.to)}
                         className="block text-sm font-bold uppercase tracking-[0.08em] text-black"
                     >
                         {column.heading.label}
@@ -622,7 +638,7 @@ const renderMobileMegaMenu = (menu) => {
                         {column.links.map((item) => (
                             <AppLink
                                 key={item.label}
-                                to={item.to}
+                                to={buildShopCategoryLink(item.to)}
                                 className="text-sm tracking-[0.02em] text-black/75 transition hover:text-black"
                             >
                                 {item.label}
@@ -1066,7 +1082,7 @@ const Header = () => {
                                         </AppLink>
                                     </>
                                 )}
-                                {merchandisingLinks.map((item) => (
+                                {/* {merchandisingLinks.map((item) => (
                                     <AppLink
                                         key={item.label}
                                         to={item.to}
@@ -1074,7 +1090,7 @@ const Header = () => {
                                     >
                                         {item.label}
                                     </AppLink>
-                                ))}
+                                ))} */}
                             </div>
                         </div>
                     </div>
@@ -1108,7 +1124,7 @@ const Header = () => {
                         );
                     })}
 
-                    {merchandisingLinks.map((item) => (
+                    {/* {merchandisingLinks.map((item) => (
                         <AppLink
                             key={item.label}
                             to={item.to}
@@ -1116,7 +1132,7 @@ const Header = () => {
                         >
                             {item.label}
                         </AppLink>
-                    ))}
+                    ))} */}
                 </nav>
 
                 <div

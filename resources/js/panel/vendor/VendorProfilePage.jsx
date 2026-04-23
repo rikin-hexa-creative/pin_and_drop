@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useVendorProfile } from "../../apis/vendor.api";
 import ProductCard from "../../components/product/ProductCard";
@@ -14,6 +15,9 @@ const StatBlock = ({ label, value }) => (
 const VendorProfilePage = () => {
     const { id } = useParams();
     const { data: vendor, error, isLoading } = useVendorProfile(id);
+    const [activeTab, setActiveTab] = useState("posts");
+
+    const vendorDescription = vendor?.description?.trim() || "No Discription";
 
     if (isLoading) {
         return (
@@ -79,7 +83,7 @@ const VendorProfilePage = () => {
                                     {vendor.description ||
                                         "No brand narrative has been added for this vendor yet."}
                                 </p>
-                                <div className="mt-5 flex flex-wrap gap-3">
+                                {/* <div className="mt-5 flex flex-wrap gap-3">
                                     {vendor.email ? (
                                         <a
                                             href={`mailto:${vendor.email}`}
@@ -96,7 +100,7 @@ const VendorProfilePage = () => {
                                             {vendor.phone}
                                         </a>
                                     ) : null}
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
@@ -105,10 +109,10 @@ const VendorProfilePage = () => {
                                 label="Posted Products"
                                 value={vendor.stats.products_count}
                             />
-                            <StatBlock
+                            {/* <StatBlock
                                 label="Sold Items"
                                 value={vendor.stats.sold_items_count}
-                            />
+                            /> */}
                             <StatBlock
                                 label="Featured"
                                 value={vendor.stats.featured_products_count}
@@ -126,13 +130,23 @@ const VendorProfilePage = () => {
                         <div className="flex items-center gap-6">
                             <button
                                 type="button"
-                                className="border-b-2 border-black pb-3 text-sm font-black uppercase tracking-[0.18em] text-black"
+                                onClick={() => setActiveTab("posts")}
+                                className={`pb-3 text-sm font-black uppercase tracking-[0.18em] ${
+                                    activeTab === "posts"
+                                        ? "border-b-2 border-black text-black"
+                                        : "text-black/35"
+                                }`}
                             >
                                 Posts
                             </button>
                             <button
                                 type="button"
-                                className="pb-3 text-sm font-black uppercase tracking-[0.18em] text-black/35"
+                                onClick={() => setActiveTab("about")}
+                                className={`pb-3 text-sm font-black uppercase tracking-[0.18em] ${
+                                    activeTab === "about"
+                                        ? "border-b-2 border-black text-black"
+                                        : "text-black/35"
+                                }`}
                             >
                                 About
                             </button>
@@ -146,30 +160,41 @@ const VendorProfilePage = () => {
                         </Link>
                     </div>
 
-                    {vendor.products?.length ? (
-                        <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {vendor.products.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    variant="shop"
-                                    title={product.name}
-                                    image={product.image}
-                                    size={product.size}
-                                    price={product.price_formatted}
-                                    brand={product.brand}
-                                    badge={product.badge}
-                                    to={`/product/${product.id}`}
-                                />
-                            ))}
-                        </div>
+                    {activeTab === "posts" ? (
+                        vendor.products?.length ? (
+                            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {vendor.products.map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        variant="shop"
+                                        title={product.name}
+                                        image={product.image}
+                                        size={product.size}
+                                        price={product.price_formatted}
+                                        brand={product.brand}
+                                        badge={product.badge}
+                                        to={`/product/${product.id}`}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="mt-8 rounded-[28px] border border-dashed border-black/10 bg-[#faf6f1] px-6 py-20 text-center">
+                                <p className="font-['Inter'] text-2xl font-black uppercase tracking-tight text-black">
+                                    No public posts yet
+                                </p>
+                                <p className="mt-3 text-sm leading-6 text-black/60">
+                                    When this vendor publishes approved active
+                                    products, they will appear here.
+                                </p>
+                            </div>
+                        )
                     ) : (
-                        <div className="mt-8 rounded-[28px] border border-dashed border-black/10 bg-[#faf6f1] px-6 py-20 text-center">
-                            <p className="font-['Inter'] text-2xl font-black uppercase tracking-tight text-black">
-                                No public posts yet
+                        <div className="mt-8 rounded-[28px] border border-black/8 bg-[#faf6f1] px-6 py-10">
+                            <p className="font-['Space_Grotesk'] text-[10px] font-bold uppercase tracking-[0.28em] text-black/45">
+                                About Vendor
                             </p>
-                            <p className="mt-3 text-sm leading-6 text-black/60">
-                                When this vendor publishes approved active
-                                products, they will appear here.
+                            <p className="mt-4 max-w-3xl text-sm leading-7 text-black/70">
+                                {vendorDescription}
                             </p>
                         </div>
                     )}
