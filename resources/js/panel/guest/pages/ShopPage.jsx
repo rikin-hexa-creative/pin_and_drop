@@ -417,7 +417,7 @@ const ShopPage = () => {
     const [minPriceInput, setMinPriceInput] = useState("");
     const [maxPriceInput, setMaxPriceInput] = useState("");
     const loadMoreRef = useRef(null);
-    const selectedCategories = Array.from(
+    const selectedCategorySlugs = Array.from(
         new Set(searchParams.getAll("category").filter(Boolean))
     );
 
@@ -486,10 +486,22 @@ const ShopPage = () => {
         error: filterError,
         isLoading: isFilterLoading,
     } = useProductFilters();
+    const categoryOptions =
+        categories.length > 0 ? categories : filterData.categories ?? [];
+    const slugToCategory = new Map(
+        categoryOptions.map((category) => [category.slug, category])
+    );
+    const selectedCategoryIds = selectedCategorySlugs
+        .map((slug) => slugToCategory.get(slug)?.id)
+        .filter((id) => Number.isInteger(id));
+    const designerOptions = filterData.designers ?? [];
+    const sizeOptions = filterData.sizes ?? [];
+    const colorOptions = filterData.colors ?? [];
+    const priceBounds = filterData.price_range ?? { min: 0, max: 0 };
 
     const productParams = {
         search: debouncedSearch || undefined,
-        category: selectedCategories,
+        category: selectedCategoryIds,
         designer: selectedDesigners,
         size: selectedSizes,
         color: selectedColors,
@@ -538,17 +550,11 @@ const ShopPage = () => {
         return () => observer.disconnect();
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-    const categoryOptions =
-        categories.length > 0 ? categories : filterData.categories ?? [];
-    const designerOptions = filterData.designers ?? [];
-    const sizeOptions = filterData.sizes ?? [];
-    const colorOptions = filterData.colors ?? [];
-    const priceBounds = filterData.price_range ?? { min: 0, max: 0 };
     const productPages = data?.pages ?? [];
     const products = productPages.flatMap((page) => page?.data ?? []);
     const totalProducts = productPages[0]?.meta?.total ?? 0;
     const activeFilterCount =
-        selectedCategories.length +
+        selectedCategorySlugs.length +
         selectedDesigners.length +
         selectedSizes.length +
         selectedColors.length +
@@ -556,19 +562,40 @@ const ShopPage = () => {
         (minPrice !== undefined || maxPrice !== undefined ? 1 : 0);
 
     // Build a slug→id lookup from the flat categories list
-    const slugToId = new Map(
-        categories.map((cat) => [cat.slug, cat.id])
-    );
+    const updateUrlSearchParams = (updateFn) => {
+        const nextSearchParams = new URLSearchParams(searchParams);
+        updateFn(nextSearchParams);
 
-    // Resolve a category slug to its numeric ID (for the API filter)
-    const resolveSlugToId = (slug) => slugToId.get(slug) ?? slug;
+        if (nextSearchParams.toString() === searchParams.toString()) {
+            return;
+        }
+
+        setSearchParams(nextSearchParams, { replace: true });
+    };
 
     const onToggleCategory = (slugOrId) => {
-        const id = typeof slugOrId === "string" ? resolveSlugToId(slugOrId) : slugOrId;
+        const slug =
+            typeof slugOrId === "string"
+                ? slugOrId
+                : categoryOptions.find((category) => category.id === slugOrId)
+                      ?.slug;
+
+        if (!slug) {
+            return;
+        }
+
         startTransition(() => {
-            setSelectedCategories((currentValues) =>
-                toggleSelection(currentValues, id)
-            );
+            updateUrlSearchParams((nextSearchParams) => {
+                const currentValues = Array.from(
+                    new Set(nextSearchParams.getAll("category").filter(Boolean))
+                );
+                const nextValues = toggleSelection(currentValues, slug);
+
+                nextSearchParams.delete("category");
+                nextValues.forEach((value) =>
+                    nextSearchParams.append("category", value)
+                );
+            });
         });
     };
 
@@ -598,26 +625,19 @@ const ShopPage = () => {
 
     const clearAllFilters = () => {
         startTransition(() => {
-            clearSearch();
-            setSelectedCategories([]);
+            setSearchInput("");
             setSelectedDesigners([]);
             setSelectedSizes([]);
             setSelectedColors([]);
             setSort("latest");
             setMinPriceInput("");
             setMaxPriceInput("");
+            updateUrlSearchParams((nextSearchParams) => {
+                nextSearchParams.delete("search");
+                nextSearchParams.delete("category");
+            });
         });
     };
-
-    // Build slug array for active display in the hierarchical menu
-    const activeSlugs = selectedCategories.map((id) => {
-        const cat = categories.find((c) => c.id === id);
-        return cat?.slug ?? String(id);
-    });
-
-    const categoryLookup = new Map(
-        categories.map((category) => [category.id, category.name])
-    );
 
     const activeFilterChips = [
         ...selectedDesigners.map((designer) => ({
@@ -625,12 +645,12 @@ const ShopPage = () => {
             label: designer,
             onRemove: () => onToggleDesigner(designer),
         })),
-        ...selectedCategories.map((categoryId) => {
-            const cat = categories.find((c) => c.id === categoryId);
+        ...selectedCategorySlugs.map((categorySlug) => {
+            const category = slugToCategory.get(categorySlug);
             return {
-                key: `category-${categoryId}`,
-                label: cat?.name ?? categoryLookup.get(categoryId) ?? `Category ${categoryId}`,
-                onRemove: () => onToggleCategory(categoryId),
+                key: `category-${categorySlug}`,
+                label: category?.name ?? formatCategorySlug(categorySlug),
+                onRemove: () => onToggleCategory(categorySlug),
             };
         }),
         ...selectedSizes.map((size) => ({
@@ -686,7 +706,7 @@ const ShopPage = () => {
                             maxPriceInput={maxPriceInput}
                             minPriceInput={minPriceInput}
                             priceBounds={priceBounds}
-                            selectedCategories={activeSlugs}
+                            selectedCategories={selectedCategorySlugs}
                             selectedColors={selectedColors}
                             selectedDesigners={selectedDesigners}
                             selectedSizes={selectedSizes}
@@ -715,7 +735,7 @@ const ShopPage = () => {
                                         maxPriceInput={maxPriceInput}
                                         minPriceInput={minPriceInput}
                                         priceBounds={priceBounds}
-                                        selectedCategories={activeSlugs}
+                                        selectedCategories={selectedCategorySlugs}
                                         selectedColors={selectedColors}
                                         selectedDesigners={selectedDesigners}
                                         selectedSizes={selectedSizes}
