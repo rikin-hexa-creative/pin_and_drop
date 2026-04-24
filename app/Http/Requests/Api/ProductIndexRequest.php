@@ -16,7 +16,7 @@ class ProductIndexRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:120'],
             'category' => ['nullable', 'array'],
-            'category.*' => ['integer', 'exists:categories,id'],
+            'category.*' => ['string', 'max:150', 'exists:categories,slug'],
             'designer' => ['nullable', 'array'],
             'designer.*' => ['string', 'max:150'],
             'size' => ['nullable', 'array'],

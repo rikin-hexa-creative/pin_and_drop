@@ -491,9 +491,6 @@ const ShopPage = () => {
     const slugToCategory = new Map(
         categoryOptions.map((category) => [category.slug, category])
     );
-    const selectedCategoryIds = selectedCategorySlugs
-        .map((slug) => slugToCategory.get(slug)?.id)
-        .filter((id) => Number.isInteger(id));
     const designerOptions = filterData.designers ?? [];
     const sizeOptions = filterData.sizes ?? [];
     const colorOptions = filterData.colors ?? [];
@@ -501,7 +498,7 @@ const ShopPage = () => {
 
     const productParams = {
         search: debouncedSearch || undefined,
-        category: selectedCategoryIds,
+        category: selectedCategorySlugs,
         designer: selectedDesigners,
         size: selectedSizes,
         color: selectedColors,

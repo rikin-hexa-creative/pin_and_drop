@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ProductIndexRequest;
 use App\Http\Resources\CatalogProductResource;
 use App\Http\Resources\ProductDetailResource;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class ProductController extends Controller
         $priceExpression = Product::catalogPriceExpression();
         $perPage = (int) ($validated['per_page'] ?? 12);
         $search = isset($validated['search']) ? Str::squish($validated['search']) : null;
+        $selectedCategoryIds = $this->resolveCategoryIds($validated['category'] ?? []);
 
         $catalogProducts = Product::query()
             ->select('products.id', 'products.created_at')
@@ -35,7 +37,7 @@ class ProductController extends Controller
                         ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', $like));
                 });
             })
-            ->when(! empty($validated['category']), fn ($query) => $query->whereIn('products.category_id', $validated['category']))
+            ->when(! empty($selectedCategoryIds), fn ($query) => $query->whereIn('products.category_id', $selectedCategoryIds))
             ->when(! empty($validated['designer']), function ($query) use ($validated) {
                 $query->whereHas('vendor', fn ($vendorQuery) => $vendorQuery->whereIn('business_name', $validated['designer']));
             })
@@ -127,5 +129,45 @@ class ProductController extends Controller
         return response()->json([
             'data' => ProductDetailResource::make($product),
         ]);
+    }
+
+    private function resolveCategoryIds(array $slugs): array
+    {
+        if (empty($slugs)) {
+            return [];
+        }
+
+        $categories = Category::query()
+            ->visibleInCatalog()
+            ->get(['id', 'parent_id', 'slug']);
+
+        $selectedIds = $categories
+            ->whereIn('slug', $slugs)
+            ->pluck('id')
+            ->all();
+
+        if (empty($selectedIds)) {
+            return [];
+        }
+
+        $childrenByParentId = $categories->groupBy('parent_id');
+        $resolvedIds = [];
+        $pendingIds = $selectedIds;
+
+        while (! empty($pendingIds)) {
+            $currentId = array_pop($pendingIds);
+
+            if (isset($resolvedIds[$currentId])) {
+                continue;
+            }
+
+            $resolvedIds[$currentId] = true;
+
+            foreach ($childrenByParentId->get($currentId, []) as $childCategory) {
+                $pendingIds[] = $childCategory->id;
+            }
+        }
+
+        return array_map('intval', array_keys($resolvedIds));
     }
 }
