@@ -663,8 +663,6 @@ const Header = () => {
     const womenswearMenu =
         categoriesMenuData?.womenswear || fallbackWomenswearMenu;
 
-
-
     const megaMenus = [vendorsMenu, menswearMenu, womenswearMenu];
 
     const [activeMenu, setActiveMenu] = useState(null);
@@ -689,7 +687,7 @@ const Header = () => {
             new URLSearchParams(location.search).get("search") ?? "";
 
         setSearchInput((currentValue) =>
-            currentValue === nextSearchValue ? currentValue : nextSearchValue
+            currentValue === nextSearchValue ? currentValue : nextSearchValue,
         );
     }, [location.pathname, location.search]);
 
@@ -774,101 +772,72 @@ const Header = () => {
             className="sticky top-0 z-50 border-b border-black/10 bg-white/95 text-black backdrop-blur"
         >
             <nav aria-label="global" className="border-b border-black/10">
-                <div className="mx-auto grid max-w-[1440px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-3 lg:grid-cols-[220px_minmax(320px,1fr)_auto] lg:gap-6 lg:px-6">
-                    <div className="flex items-center gap-3">
+                <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-4 lg:px-6 bg-[#fcfcfc]">
+                    <div className="flex items-center gap-4">
                         <button
                             type="button"
                             aria-label="Open navigation menu"
                             aria-expanded={mobileMenuOpen}
-                            className="inline-flex h-10 w-10 items-center justify-center border border-black/10 text-black transition hover:bg-black hover:text-white lg:hidden"
+                            className="inline-flex h-10 w-10 items-center justify-center text-black transition hover:opacity-70 lg:hidden"
                             onClick={toggleMobileMenu}
                         >
                             <MenuIcon />
                         </button>
 
-                        <div className="min-w-0">
-                            <AppLink to="/" className="block">
-                                {/* <video
-                                    poster="https://assets.grailed.com/logo.jpg"
-                                    className="h-10 w-[126px] object-contain"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                >
-                                    <source src="https://assets.grailed.com/logo.webm" type="video/webm" />
-                                    <source src="https://assets.grailed.com/logo.mp4" type="video/mp4" />
-                                </video> */}
-                                <img src="/logo/logo_two.png" alt="Logo" className="size-20 object-contain"/>
-                            </AppLink>
-                        </div>
+                        <AppLink to="/" className="block">
+                            <img
+                                src="/logo/logo_two.png"
+                                alt="Pin & Wear Logo"
+                                className="h-16 w-auto object-contain"
+                            />
+                        </AppLink>
                     </div>
 
-                    <div className="hidden lg:block">
-                        <form
-                            className="flex items-center gap-2"
-                            onSubmit={handleSearchSubmit}
+                    <div className="hidden lg:flex items-center gap-8">
+                        <AppLink
+                            to="/my-feed"
+                            className="text-[13px] font-semibold text-black transition hover:opacity-70"
                         >
-                            <label className="relative flex-1">
-                                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-black/60">
-                                    <SearchIcon />
-                                </span>
-                                <input
-                                    value={searchInput}
-                                    onChange={(event) =>
-                                        setSearchInput(event.target.value)
-                                    }
-                                    type="search"
-                                    placeholder="Search for anything"
-                                    className="h-10 w-full border border-black/15 bg-white pl-10 pr-4 text-sm text-black placeholder:text-black/40 focus:border-black focus:outline-none"
-                                />
-                            </label>
-                            <button
-                                type="submit"
-                                className="h-10 border border-black/15 px-4 text-[11px] font-bold uppercase tracking-[0.22em] text-black transition hover:border-black hover:bg-black hover:text-white"
-                            >
-                                Search
-                            </button>
-                        </form>
+                            New
+                        </AppLink>
+                        <AppLink
+                            to="/shop"
+                            className="text-[13px] font-semibold text-black transition hover:opacity-70"
+                        >
+                            Thrift
+                        </AppLink>
+                        <AppLink
+                            to="/my-feed"
+                            className="text-[13px] font-semibold text-black transition hover:opacity-70"
+                        >
+                            Trending
+                        </AppLink>
+                        <AppLink
+                            to="/become-vendor"
+                            className="text-[13px] font-semibold text-black transition hover:opacity-70"
+                        >
+                            Become a Vendor
+                        </AppLink>
                     </div>
 
-                    <div className="ml-auto flex items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-5">
                         <button
                             type="button"
                             aria-label="Open search"
-                            className="inline-flex h-10 w-10 items-center justify-center border border-black/10 text-black transition hover:bg-black hover:text-white lg:hidden"
+                            className="text-black transition hover:opacity-70"
                         >
                             <SearchIcon />
                         </button>
 
-                        {quickActions.map((action) => (
-                            <AppLink
-                                key={action.label}
-                                to={action.to}
-                                className={`hidden h-10 items-center px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-black hover:text-white sm:inline-flex ${
-                                    action.bordered
-                                        ? "border border-black/15"
-                                        : ""
-                                }`}
-                            >
-                                {action.label}
-                            </AppLink>
-                        ))}
-
-                        {/* <AppLink
-                            to="/messages"
-                            aria-label="Messages"
-                            className="hidden h-10 w-10 items-center justify-center text-black transition hover:bg-black hover:text-white sm:inline-flex"
-                        >
-                            <MessageIcon />
-                        </AppLink> */}
-
                         <AppLink
                             to="/pin"
                             aria-label="Favorites"
-                            className="hidden h-10 w-10 items-center justify-center text-black transition hover:bg-black hover:text-white sm:inline-flex"
+                            className="relative text-black transition hover:opacity-70 hidden sm:block"
                         >
                             <HeartIcon />
+                            <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#cba265] text-[9px] font-bold text-white">
+                                3
+                            </span>
                         </AppLink>
 
                         {isAuthenticated ? (
@@ -887,18 +856,20 @@ const Header = () => {
                                     data-state={
                                         profileMenuOpen ? "open" : "closed"
                                     }
-                                    className={`inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border transition ${
-                                        profileMenuOpen
-                                            ? "border-black shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
-                                            : "border-black/10"
-                                    }`}
+                                    className="text-black transition hover:opacity-70"
                                     onClick={toggleProfileMenu}
                                 >
-                                    <img
-                                        className="h-full w-full object-cover"
-                                        alt="User avatar"
-                                        src={userAvatar}
-                                    />
+                                    <svg
+                                        className="h-5 w-5 fill-none stroke-current"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                                        />
+                                    </svg>
                                 </button>
 
                                 {profileMenuOpen && (
@@ -910,7 +881,7 @@ const Header = () => {
                                         role="menu"
                                         aria-orientation="vertical"
                                         aria-labelledby="desktop-profile-trigger"
-                                        className="absolute right-0 top-[calc(100%+12px)] z-50 w-[284px] rounded-[28px] border border-black/10 bg-white p-3 text-black shadow-[0_28px_90px_rgba(0,0,0,0.18)]"
+                                        className="absolute right-0 top-[calc(100%+16px)] z-50 w-[284px] rounded-[28px] border border-black/10 bg-white p-3 text-black shadow-[0_28px_90px_rgba(0,0,0,0.18)]"
                                     >
                                         <AppLink
                                             to={profileMenu.username.to}
@@ -938,7 +909,7 @@ const Header = () => {
                                                     >
                                                         {item.label}
                                                     </AppLink>
-                                                )
+                                                ),
                                             )}
                                         </div>
 
@@ -977,7 +948,7 @@ const Header = () => {
                                                     >
                                                         {item.label}
                                                     </AppLink>
-                                                )
+                                                ),
                                             )}
                                         </div>
 
@@ -1014,21 +985,44 @@ const Header = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="hidden items-center gap-2 sm:flex">
-                                <AppLink
-                                    to="/sign-in"
-                                    className="h-10 border border-black/15 px-4 inline-flex items-center text-[11px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-black hover:text-white"
+                            <AppLink
+                                to="/sign-in"
+                                className="text-black transition hover:opacity-70 hidden sm:block"
+                            >
+                                <svg
+                                    className="h-5 w-5 fill-none stroke-current"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
                                 >
-                                    SIGN IN
-                                </AppLink>
-                                <AppLink
-                                    to="/sign-up"
-                                    className="h-10 border border-black bg-black px-4 inline-flex items-center text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-black"
-                                >
-                                    SIGN UP
-                                </AppLink>
-                            </div>
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                                    />
+                                </svg>
+                            </AppLink>
                         )}
+
+                        <AppLink
+                            to="/cart"
+                            aria-label="Cart"
+                            className="relative text-black transition hover:opacity-70"
+                        >
+                            <svg
+                                className="h-5 w-5 fill-none stroke-current"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                                />
+                            </svg>
+                            <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[9px] font-bold text-white">
+                                2
+                            </span>
+                        </AppLink>
                     </div>
                 </div>
 
@@ -1145,7 +1139,7 @@ const Header = () => {
                     <div className="mx-auto max-w-[1440px] px-6 py-8">
                         {renderDesktopMegaMenu(
                             megaMenus.find((menu) => menu.id === activeMenu) ||
-                                null
+                                null,
                         )}
                     </div>
                 </div>
