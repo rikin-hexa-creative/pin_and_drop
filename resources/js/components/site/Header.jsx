@@ -837,17 +837,17 @@ const Header = () => {
                             New
                         </AppLink>
                         <AppLink
-                            to="/shop"
+                            to="/sell"
                             className="text-[13px] font-semibold text-black transition hover:opacity-70"
                         >
                             Thrift
                         </AppLink>
-                        <AppLink
+                        {/* <AppLink
                             to="/my-feed"
                             className="text-[13px] font-semibold text-black transition hover:opacity-70"
                         >
                             Trending
-                        </AppLink>
+                        </AppLink> */}
                         <AppLink
                             to="/become-vendor"
                             className="text-[13px] font-semibold text-black transition hover:opacity-70"
