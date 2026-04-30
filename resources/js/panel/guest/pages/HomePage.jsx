@@ -1,6 +1,45 @@
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "../../../apis/axios-instance.api";
 
 const HomePage = () => {
+    const [subscriberEmail, setSubscriberEmail] = useState("");
+    const [subscriberStatus, setSubscriberStatus] = useState("idle"); // idle, submitting, success, error
+    const [subscriberMessage, setSubscriberMessage] = useState("");
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchInput, setSearchInput] = useState("");
+    const searchRef = useRef(null);
+    const navigate = useNavigate();
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            navigate(`/shop?search=${encodeURIComponent(searchInput.trim())}`);
+            setIsSearchOpen(false);
+        }
+    };
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        setSubscriberStatus("submitting");
+        setSubscriberMessage("");
+
+        try {
+            const response = await axiosInstance.post("/subscribers", {
+                email: subscriberEmail,
+            });
+            if (response.status === 201) {
+                setSubscriberStatus("success");
+                setSubscriberEmail("");
+                setSubscriberMessage("Thank you for subscribing!");
+            }
+        } catch (error) {
+            setSubscriberStatus("error");
+            setSubscriberMessage(
+                error.response?.data?.message || "Something went wrong.",
+            );
+        }
+    };
+
     return (
         <div className="bg-[#fcfcfc] pb-0">
             <section className="relative flex min-h-[600px] items-center justify-center sm:min-h-[85vh]">
@@ -33,7 +72,7 @@ const HomePage = () => {
                             Explore Collection
                         </Link>
                         <Link
-                            to="/become-vendor"
+                            to="/sell/for-sale"
                             className="inline-flex h-12 min-w-[160px] items-center justify-center rounded-[8px] border border-white bg-transparent px-6 text-[13px] font-semibold text-white backdrop-blur-sm transition hover:bg-white/10 sm:h-[50px] sm:min-w-[180px] sm:text-[14px]"
                         >
                             Start Selling
@@ -75,16 +114,31 @@ const HomePage = () => {
                 <div className="mx-auto max-w-5xl">
                     {/* Search Bar */}
                     <div className="mx-auto mb-20 max-w-3xl">
-                        <form className="relative" onSubmit={(e) => e.preventDefault()}>
+                        <form
+                            className="relative"
+                            onSubmit={handleSearchSubmit}
+                        >
                             <span className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-black/40">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
                                 </svg>
                             </span>
-                            <input 
-                                type="search" 
-                                placeholder="Search for fashion, brands, or styles..." 
+                            <input
+                                type="search"
+                                placeholder="Search for fashion, brands, or styles..."
                                 className="h-14 w-full rounded-[12px] border border-black/10 bg-white pl-14 pr-4 text-[15px] text-black placeholder:text-black/50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition shadow-sm"
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
                             />
                         </form>
                     </div>
@@ -95,24 +149,31 @@ const HomePage = () => {
                             Shop by Category
                         </h2>
                         <p className="text-[15px] text-black/60">
-                            Discover new arrivals or explore curated vintage collections
+                            Discover new arrivals or explore curated vintage
+                            collections
                         </p>
                     </div>
 
                     {/* Category Grid */}
                     <div className="grid gap-6 sm:grid-cols-2">
-                        <Link to="/shop" className="group relative block aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f5f5f5]">
-                            <img 
-                                src="https://images.unsplash.com/photo-1550614000-4b91d92636eb?auto=format&fit=crop&q=80&w=1000" 
-                                alt="Shop Category" 
+                        <Link
+                            to="/shop?category=tops-men"
+                            className="group relative block aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f5f5f5]"
+                        >
+                            <img
+                                src="/images/category/mens.webp"
+                                alt="Shop Category"
                                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                             />
                         </Link>
-                        
-                        <Link to="/shop" className="group relative block aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f5f5f5]">
-                            <img 
-                                src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&q=80&w=1000" 
-                                alt="Shop Category" 
+
+                        <Link
+                            to="/shop?category=tops-women"
+                            className="group relative block aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f5f5f5]"
+                        >
+                            <img
+                                src="/images/category/women.webp"
+                                alt="Shop Category"
                                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                             />
                         </Link>
@@ -195,10 +256,10 @@ const HomePage = () => {
                     {/* CTA Section */}
                     <div className="flex flex-col items-center gap-6 mt-8">
                         <Link
-                            to="/become-vendor"
+                            to="/sign-up"
                             className="rounded-full bg-black px-8 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-xl shadow-black/20 transition hover:-translate-y-0.5"
                         >
-                            Start Selling Today
+                            Sign Up
                         </Link>
                         <p className="text-xs text-black/60">
                             No setup fees • Get started in minutes • Cancel
@@ -246,7 +307,10 @@ const HomePage = () => {
                                     "Reach thousands of fashion-forward buyers actively searching",
                             },
                         ].map((feature, index) => (
-                            <div key={index} className="text-center bg-white rounded-3xl p-8 border border-black/5 shadow-sm">
+                            <div
+                                key={index}
+                                className="text-center bg-white rounded-3xl p-8 border border-black/5 shadow-sm"
+                            >
                                 <div className="mb-4 flex justify-center">
                                     <div className="text-4xl">
                                         {feature.icon}
@@ -273,10 +337,9 @@ const HomePage = () => {
                 </div>
             </section>
 
-            <section className="px-4 py-20 bg-white">
+            {/* <section className="px-4 py-20 bg-white">
                 <div className="mx-auto max-w-6xl">
                     <div className="relative overflow-hidden rounded-[24px] bg-[#0a0a0a] p-8 sm:p-12 lg:p-16">
-                        {/* Subtle background glow */}
                         <div className="pointer-events-none absolute -right-20 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-[#cba265]/10 blur-[100px]" />
 
                         <div className="relative grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
@@ -401,7 +464,7 @@ const HomePage = () => {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             <section className="px-4 py-24">
                 <div className="mx-auto max-w-5xl text-center">
@@ -546,36 +609,79 @@ const HomePage = () => {
                                 your inbox.
                             </p>
 
-                            <form
-                                className="mb-6 flex w-full max-w-lg flex-col gap-3 sm:flex-row"
-                                onSubmit={(e) => e.preventDefault()}
-                            >
-                                <input
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    className="h-[50px] flex-1 rounded-xl border border-white/10 bg-white/5 px-5 text-sm text-white placeholder-white/40 outline-none focus:border-[#cba265] focus:ring-1 focus:ring-[#cba265] transition"
-                                    required
-                                />
-                                <button
-                                    type="submit"
-                                    className="flex h-[50px] items-center justify-center rounded-xl bg-[#cba265] px-8 text-sm font-semibold text-white transition hover:bg-[#b89154]"
-                                >
-                                    Subscribe
-                                    <svg
-                                        className="ml-2 h-4 w-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
+                            {subscriberStatus === "success" ? (
+                                <div className="mb-6 rounded-xl bg-green-500/10 border border-green-500/20 px-6 py-4 text-green-400">
+                                    <p className="flex items-center justify-center text-sm font-medium">
+                                        <svg
+                                            className="mr-2 h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                        {subscriberMessage}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="w-full max-w-lg">
+                                    <form
+                                        className="mb-3 flex w-full flex-col gap-3 sm:flex-row"
+                                        onSubmit={handleSubscribe}
                                     >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                        <input
+                                            type="email"
+                                            value={subscriberEmail}
+                                            onChange={(e) =>
+                                                setSubscriberEmail(
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Enter your email"
+                                            className="h-[50px] flex-1 rounded-xl border border-white/10 bg-white/5 px-5 text-sm text-white placeholder-white/40 outline-none focus:border-[#cba265] focus:ring-1 focus:ring-[#cba265] transition"
+                                            required
                                         />
-                                    </svg>
-                                </button>
-                            </form>
+                                        <button
+                                            type="submit"
+                                            disabled={
+                                                subscriberStatus ===
+                                                "submitting"
+                                            }
+                                            className="flex h-[50px] items-center justify-center rounded-xl bg-[#cba265] px-8 text-sm font-semibold text-white transition hover:bg-[#b89154] disabled:opacity-70 disabled:cursor-not-allowed"
+                                        >
+                                            {subscriberStatus === "submitting"
+                                                ? "Subscribing..."
+                                                : "Subscribe"}
+                                            {subscriberStatus !==
+                                                "submitting" && (
+                                                <svg
+                                                    className="ml-2 h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                                    />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </form>
+                                    {subscriberStatus === "error" && (
+                                        <p className="mb-3 text-sm text-red-400 text-left pl-2">
+                                            {subscriberMessage}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
                             <p className="text-[12px] text-white/40">
                                 Join 50,000+ fashion enthusiasts. Unsubscribe

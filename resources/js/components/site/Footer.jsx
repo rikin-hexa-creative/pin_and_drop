@@ -41,7 +41,7 @@ const Footer = () => {
                 </div>
 
                 <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row">
-                    <span className="uppercase tracking-[0.2em]">Pine And Wear</span>
+                    <span className="uppercase tracking-[0.2em]">Pin And Wear</span>
                     <div className="flex gap-4 uppercase tracking-[0.2em]">
                         <a href="/" className="transition hover:text-white">
                             Terms

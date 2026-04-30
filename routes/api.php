@@ -51,3 +51,5 @@ Route::get('/vendors/{identifier}', [VendorController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/filters', [ProductFilterController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show'])->whereNumber('id');
+Route::post('/vendor-contacts', [\App\Http\Controllers\Api\VendorContactController::class, 'store']);
+Route::post('/subscribers', [\App\Http\Controllers\Api\SubscriberController::class, 'store']);

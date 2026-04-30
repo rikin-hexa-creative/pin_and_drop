@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignInPage from "../panel/auth/SignInPage";
 import SignUpPage from "../panel/auth/SignUpPage";
 import Layout from "../panel/guest/layout/Layout";
+import BecomeVendorPage from "../panel/guest/pages/BecomeVendorPage";
 import CartPage from "../panel/guest/pages/CartPage";
 import CheckoutPage from "../panel/guest/pages/CheckoutPage";
 import HomePage from "../panel/guest/pages/HomePage";
@@ -103,6 +104,10 @@ const MyRouter = () => {
                 {
                     path: "/sell/add",
                     element: <AddForSalePage />,
+                },
+                {
+                    path: "/become-vendor",
+                    element: <BecomeVendorPage />,
                 },
             ],
         },

@@ -669,13 +669,20 @@ const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [searchInput, setSearchInput] = useState("");
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const profileMenuRef = useRef(null);
+    const searchRef = useRef(null);
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            navigate(`/shop?search=${encodeURIComponent(searchInput.trim())}`);
+            setIsSearchOpen(false);
+        }
+    };
     const isAuthenticated = Boolean(user);
     const userDisplayName =
         user?.full_name || user?.email || profileMenu.username.label;
-    const userAvatar =
-        "/storage/" + user?.avatar ||
-        "https://media-assets.grailed.com/prd/misc/PVEFHQYACL92VZTZETOTVQNFENXZW7S5U0MLUG";
 
     useEffect(() => {
         if (!SEARCH_ROUTES.has(location.pathname)) {
@@ -717,6 +724,35 @@ const Header = () => {
         };
     }, [profileMenuOpen]);
 
+    useEffect(() => {
+        if (!isSearchOpen) {
+            return undefined;
+        }
+
+        const handlePointerDown = (event) => {
+            if (
+                !searchRef.current?.contains(event.target) &&
+                !event.target.closest('[aria-label="Open search"]')
+            ) {
+                setIsSearchOpen(false);
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") {
+                setIsSearchOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isSearchOpen]);
+
     const openMenu = (menuId) => {
         setProfileMenuOpen(false);
         setActiveMenu(menuId);
@@ -739,25 +775,25 @@ const Header = () => {
     };
 
     const closeProfileMenu = () => setProfileMenuOpen(false);
-    const handleSearchSubmit = (event) => {
-        event.preventDefault();
+    // const handleSearchSubmit = (event) => {
+    //     event.preventDefault();
 
-        const nextSearchValue = searchInput.trim();
-        const nextSearchParams = new URLSearchParams();
+    //     const nextSearchValue = searchInput.trim();
+    //     const nextSearchParams = new URLSearchParams();
 
-        if (nextSearchValue) {
-            nextSearchParams.set("search", nextSearchValue);
-        }
+    //     if (nextSearchValue) {
+    //         nextSearchParams.set("search", nextSearchValue);
+    //     }
 
-        setActiveMenu(null);
-        setMobileMenuOpen(false);
-        setProfileMenuOpen(false);
+    //     setActiveMenu(null);
+    //     setMobileMenuOpen(false);
+    //     setProfileMenuOpen(false);
 
-        navigate({
-            pathname: "/my-feed",
-            search: nextSearchParams.toString(),
-        });
-    };
+    //     navigate({
+    //         pathname: "/my-feed",
+    //         search: nextSearchParams.toString(),
+    //     });
+    // };
 
     const handleSignOut = () => {
         Cookies.remove("user_token");
@@ -825,6 +861,7 @@ const Header = () => {
                             type="button"
                             aria-label="Open search"
                             className="text-black transition hover:opacity-70"
+                            onClick={() => setIsSearchOpen(!isSearchOpen)}
                         >
                             <SearchIcon />
                         </button>
@@ -835,9 +872,9 @@ const Header = () => {
                             className="relative text-black transition hover:opacity-70 hidden sm:block"
                         >
                             <HeartIcon />
-                            <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#cba265] text-[9px] font-bold text-white">
+                            {/* <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#cba265] text-[9px] font-bold text-white">
                                 3
-                            </span>
+                            </span> */}
                         </AppLink>
 
                         {isAuthenticated ? (
@@ -1019,9 +1056,9 @@ const Header = () => {
                                     d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                                 />
                             </svg>
-                            <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[9px] font-bold text-white">
+                            {/* <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[9px] font-bold text-white">
                                 2
-                            </span>
+                            </span> */}
                         </AppLink>
                     </div>
                 </div>
@@ -1141,6 +1178,38 @@ const Header = () => {
                             megaMenus.find((menu) => menu.id === activeMenu) ||
                                 null,
                         )}
+                    </div>
+                </div>
+
+                {/* Search Popup */}
+                <div
+                    ref={searchRef}
+                    className={`absolute left-0 top-full z-50 w-full overflow-hidden border-t border-black/10 bg-white transition-[max-height,opacity] duration-200 shadow-xl ${
+                        isSearchOpen
+                            ? "max-h-[200px] opacity-100"
+                            : "max-h-0 opacity-0"
+                    }`}
+                >
+                    <div className="mx-auto max-w-[1440px] px-6 py-6 sm:py-8">
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            className="relative mx-auto max-w-3xl"
+                        >
+                            <input
+                                type="search"
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                placeholder="Search for fashion, brands, or styles..."
+                                className="h-14 w-full rounded-[12px] border border-black/10 bg-gray-50 pl-14 pr-4 text-[15px] text-black placeholder:text-black/50 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition shadow-sm"
+                            />
+                            <button
+                                type="submit"
+                                aria-label="Submit Search"
+                                className="absolute left-5 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition"
+                            >
+                                <SearchIcon />
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
