@@ -165,6 +165,34 @@ const HomePage = () => {
                                 alt="Shop Category"
                                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                             />
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+
+                            {/* Text Content */}
+                            <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-10">
+                                <h3 className="mb-3 text-3xl font-bold text-white sm:text-4xl">
+                                    Men's Fashion Tops
+                                </h3>
+                                <p className="mb-8 max-w-sm text-[15px] leading-relaxed text-white/90">
+                                    Shop Men’s Fashion Tops
+                                </p>
+                                <div className="inline-flex h-12 items-center justify-center rounded-full bg-[#1a1a1a]/30 px-6 backdrop-blur-md border border-white/5 text-[14px] font-medium text-white transition hover:bg-[#1a1a1a]">
+                                    Explore Collection
+                                    <svg
+                                        className="ml-2 h-4 w-4 text-[#cba265]"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
                         </Link>
 
                         <Link
@@ -176,6 +204,35 @@ const HomePage = () => {
                                 alt="Shop Category"
                                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                             />
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+
+                            {/* Text Content */}
+                            <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-10">
+                                <h3 className="mb-3 text-3xl font-bold text-white sm:text-4xl">
+                                    Women’s Fashion Tops
+                                </h3>
+                                <p className="mb-8 max-w-sm text-[15px] leading-relaxed text-white/90">
+                                    Contemporary pieces from emerging and
+                                    established designers
+                                </p>
+                                <div className="inline-flex h-12 items-center justify-center rounded-full bg-[#1a1a1a]/30 px-6 backdrop-blur-md border border-white/5 text-[14px] font-medium text-white transition hover:bg-[#1a1a1a]">
+                                    Explore Collection
+                                    <svg
+                                        className="ml-2 h-4 w-4 text-[#cba265]"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
                         </Link>
                     </div>
                 </div>
