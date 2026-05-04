@@ -7,10 +7,14 @@
 
     <title>Pin&Wear</title>
     <link rel="icon" type="image/x-icon" href="/logo/fav.png">
+
 </head>
 <body>
     <div id="app"></div>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+
 </body>
 </html>

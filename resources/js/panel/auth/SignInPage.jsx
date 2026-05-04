@@ -1,26 +1,128 @@
-import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { signIn, signInWithGoogle } from "../../apis/user-auth.api";
 import { useUser } from "../../context/UserContext";
-import { signIn } from "../../apis/user-auth.api";
 
 const SignInPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { setUser } = useUser();
+    const googleClientRef = useRef(null);
     const redirectTo =
         typeof location.state?.redirectTo === "string"
             ? location.state.redirectTo
             : "/";
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
     const [form, setForm] = useState({
         email: "",
         password: "",
     });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const completeSignIn = useEffectEvent((response) => {
+        if (response?.token) {
+            Cookies.set("user_token", response.token, {
+                expires: 7,
+                sameSite: "strict",
+            });
+        }
+
+        if (response?.user) {
+            setUser(response.user);
+            queryClient.setQueryData(["getUserProfile"], response.user);
+        }
+
+        navigate(redirectTo);
+    });
+
+    const resolveApiError = useEffectEvent(
+        (submitError, fallbackMessage = "Unable to sign in at the moment.") => {
+            const apiMessage =
+                submitError?.response?.data?.errors?.access_token?.[0] ||
+                submitError?.response?.data?.message ||
+                fallbackMessage;
+
+            setError(apiMessage);
+        }
+    );
+
+    const handleGoogleAccessToken = useEffectEvent(async (tokenResponse) => {
+        if (tokenResponse?.error || !tokenResponse?.access_token) {
+            setError(
+                tokenResponse?.error_description ||
+                    "Unable to sign in with Google at the moment."
+            );
+            setGoogleLoading(false);
+            return;
+        }
+
+        try {
+            const response = await signInWithGoogle({
+                access_token: tokenResponse.access_token,
+            });
+
+            completeSignIn(response);
+        } catch (submitError) {
+            resolveApiError(
+                submitError,
+                "Unable to sign in with Google at the moment."
+            );
+        } finally {
+            setGoogleLoading(false);
+        }
+    });
+
+    useEffect(() => {
+        if (!googleClientId) {
+            googleClientRef.current = null;
+            return undefined;
+        }
+
+        const initializeGoogleClient = () => {
+            if (!window.google?.accounts?.oauth2) {
+                return false;
+            }
+
+            googleClientRef.current = window.google.accounts.oauth2.initTokenClient(
+                {
+                    client_id: googleClientId,
+                    scope: "openid email profile",
+                    callback: (tokenResponse) => {
+                        void handleGoogleAccessToken(tokenResponse);
+                    },
+                    error_callback: () => {
+                        setGoogleLoading(false);
+                        setError("Google sign in was cancelled.");
+                    },
+                }
+            );
+
+            return true;
+        };
+
+        if (initializeGoogleClient()) {
+            return undefined;
+        }
+
+        const googleScript = document.querySelector(
+            'script[src="https://accounts.google.com/gsi/client"]'
+        );
+        const handleScriptLoad = () => {
+            initializeGoogleClient();
+        };
+
+        googleScript?.addEventListener("load", handleScriptLoad);
+
+        return () => {
+            googleScript?.removeEventListener("load", handleScriptLoad);
+        };
+    }, [googleClientId]);
 
     const onChange = (event) => {
         const { name, value } = event.target;
@@ -34,25 +136,32 @@ const SignInPage = () => {
 
         try {
             const response = await signIn(form);
-            if (response?.token) {
-                Cookies.set("user_token", response.token, {
-                    expires: 7,
-                    sameSite: "strict",
-                });
-            }
-            if (response?.user) {
-                setUser(response.user);
-                queryClient.setQueryData(["getUserProfile"], response.user);
-            }
-            navigate(redirectTo);
+
+            completeSignIn(response);
         } catch (submitError) {
-            const apiMessage =
-                submitError?.response?.data?.message ||
-                "Unable to sign in at the moment.";
-            setError(apiMessage);
+            resolveApiError(submitError);
         } finally {
             setLoading(false);
         }
+    };
+
+    const onGoogleSignIn = () => {
+        setError("");
+
+        if (!googleClientId) {
+            setError("Google sign in is not configured.");
+            return;
+        }
+
+        if (!googleClientRef.current) {
+            setError("Google sign in is still loading. Please try again.");
+            return;
+        }
+
+        setGoogleLoading(true);
+        googleClientRef.current.requestAccessToken({
+            prompt: "select_account",
+        });
     };
 
     return (
@@ -160,13 +269,14 @@ const SignInPage = () => {
                                     <div className="flex-grow border-t border-black/5" />
                                 </div>
                                 <button
-                                    className="w-full border border-black/15 bg-white text-black py-5 font-headline font-black tracking-widest text-sm uppercase hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3"
+                                    className="w-full border border-black/15 bg-white text-black py-5 font-headline font-black tracking-widest text-sm uppercase hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
                                     type="button"
+                                    onClick={onGoogleSignIn}
+                                    disabled={loading || googleLoading}
                                 >
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-bold">
-                                        G
-                                    </span>
-                                    LOGIN WITH GOOGLE
+                                    {googleLoading
+                                        ? "CONNECTING TO GOOGLE..."
+                                        : "LOGIN WITH GOOGLE"}
                                 </button>
                             </div>
                         </form>

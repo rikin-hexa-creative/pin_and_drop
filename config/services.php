@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID', env('Google_Client_ID')),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET', env('Google_Client_Secret')),
+    ],
+
 ];

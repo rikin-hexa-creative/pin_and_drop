@@ -19,3 +19,13 @@ export const signIn = async (data) => {
         throw error;
     }
 };
+
+export const signInWithGoogle = async (data) => {
+    try {
+        const response = await axiosInstance.post("/auth/google", data);
+        return response.data;
+    } catch (error) {
+        console.error("Error signing in with Google:", error);
+        throw error;
+    }
+};
