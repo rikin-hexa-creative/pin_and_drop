@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { useDeferredValue, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUserSales } from "../../apis/sale.api";
+import { useUserSales, useDeleteUserSale } from "../../apis/sale.api";
 import { formatCurrency } from "../../utils/currency";
 
 const saleBadgeClasses = {
@@ -28,7 +28,9 @@ const ForSalePage = () => {
     const isSoldRoute = location.pathname === "/sell/sold";
     const [searchInput, setSearchInput] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
+    const [deletingId, setDeletingId] = useState(null);
     const deferredSearch = useDeferredValue(searchInput.trim());
+    const deleteMutation = useDeleteUserSale();
     const { data: response, isLoading, isError } = useUserSales(
         {
             search: deferredSearch,
@@ -37,6 +39,15 @@ const ForSalePage = () => {
         },
         hasToken
     );
+
+    const handleDelete = (id) => {
+        if (window.confirm("Are you sure you want to delete this listing?")) {
+            setDeletingId(id);
+            deleteMutation.mutate(id, {
+                onSettled: () => setDeletingId(null),
+            });
+        }
+    };
 
     const listings = response?.data ?? [];
     const summary = response?.meta?.summary ?? {};
@@ -341,11 +352,21 @@ const ForSalePage = () => {
                                                 uploaded
                                             </p>
                                         </div>
-                                        <div className="text-right text-[10px] font-bold uppercase tracking-[0.22em] text-black/40">
-                                            <p>Posted</p>
-                                            <p className="mt-2 text-black/70">
-                                                {listing.posted_at_formatted}
-                                            </p>
+                                        <div className="flex flex-col items-end justify-between text-right text-[10px] font-bold uppercase tracking-[0.22em]">
+                                            <div className="text-black/40">
+                                                <p>Posted</p>
+                                                <p className="mt-1 text-black/70">
+                                                    {listing.posted_at_formatted}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(listing.id)}
+                                                disabled={deletingId === listing.id}
+                                                className="mt-3 text-[#b91c1c] transition hover:text-[#7f1d1d] disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                {deletingId === listing.id ? "Deleting..." : "Delete Listing"}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

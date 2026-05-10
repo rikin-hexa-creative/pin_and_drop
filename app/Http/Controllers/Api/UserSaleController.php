@@ -207,4 +207,21 @@ class UserSaleController extends Controller
             'data' => UserSaleResource::make($sale->fresh()),
         ], 201);
     }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $sale = $request->user()->sales()->findOrFail($id);
+
+        if (is_array($sale->images)) {
+            foreach ($sale->images as $image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($image);
+            }
+        }
+
+        $sale->delete();
+
+        return response()->json([
+            'message' => 'Sale listing deleted successfully.',
+        ]);
+    }
 }

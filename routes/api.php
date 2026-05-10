@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/collections/{id}/unpin', [UserCollectionController::class, 'unpinProduct']);
     Route::get('/user/sales', [UserSaleController::class, 'index']);
     Route::post('/user/sales', [UserSaleController::class, 'store']);
+    Route::delete('/user/sales/{id}', [UserSaleController::class, 'destroy']);
 });
 
 Route::get('/menus/vendors', [MenuController::class, 'vendors']);

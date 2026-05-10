@@ -47,6 +47,11 @@ async function createUserSale(payload) {
     return res?.data?.data ?? null;
 }
 
+async function deleteUserSale(id) {
+    const res = await axiosInstance.delete(`/user/sales/${id}`);
+    return res?.data ?? null;
+}
+
 const useSellProducts = (params = {}) => {
     return useInfiniteQuery({
         queryKey: ["sell-products", params],
@@ -96,12 +101,25 @@ const useCreateUserSale = () => {
     });
 };
 
+const useDeleteUserSale = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteUserSale,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["user-sales"] });
+        },
+    });
+};
+
 export {
     createUserSale,
+    deleteUserSale,
     getSellProductById,
     getSellProducts,
     getUserSales,
     useCreateUserSale,
+    useDeleteUserSale,
     useSellProductById,
     useSellProducts,
     useUserSales,
